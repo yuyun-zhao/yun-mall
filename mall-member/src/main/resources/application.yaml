@@ -2,6 +2,8 @@ server:
   port: 8000
 
 spring:
+  application:
+    name: yunmall-member
   datasource:
     username: root
     password: zhaoyuyun
@@ -12,8 +14,6 @@ spring:
     nacos:
       discovery:
         server-addr: localhost:8848
-  application:
-    name: yunmall-member
 
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml

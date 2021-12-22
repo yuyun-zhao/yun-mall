@@ -1,0 +1,13 @@
+server:
+  port: 88
+
+spring:
+  application:
+    name: yunmall-gateway
+  cloud:
+    nacos:
+      # 配置中心
+      config:
+        server-addr: localhost:8848
+        file-extension: yaml
+        namespace: b902ce5f-3fd0-41d9-ad4e-2e5f44836fd1

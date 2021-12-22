@@ -1,27 +1,4 @@
-server:
-  port: 7000
-
-spring:
-  # 数据源
-  datasource:
-    username: root
-    password: zhaoyuyun
-    url: jdbc:mysql://47.98.120.35:3306/yunmall_sms?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  # Spring Cloud
-  cloud:
-    nacos:
-      discovery:
-        server-addr: localhost:8848
-  application:
-    name: yunmall-coupon
-
-
-mybatis-plus:
-  mapperLocations: classpath:mapper/**/*.xml
-  global-config:
-    db-config:
-      # 设置主键自增
-      id-type: auto
-
-
+coupon:
+  user:
+    name: zhangsan
+    age: 10
