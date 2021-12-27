@@ -1,10 +1,10 @@
 server:
-  port: 7000
+  port: 10000
 
 spring:
   # 指定微服务名称，用于在注册中心
   application:
-    name: yunmall-coupon
+    name: yunmall-product
 
   # Spring Cloud
   cloud:
@@ -20,5 +20,4 @@ spring:
         # 指定分组，实现微服务间的隔离
         #group: DEFAULT_GROUP
         # 指定命名空间，实现生产/开发/测试环境间的隔离。该 id 在 Nacos Server上生成
-        namespace: 1d47edbf-9ca5-4628-a9c6-8c5cb462d8eb
-
+        namespace: e65bee3e-aec7-421a-8efa-dea0e16f908a

@@ -1,4 +1,4 @@
-package com.zhao.yumall.mallgateway;
+package com.zhao.yumall.gateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

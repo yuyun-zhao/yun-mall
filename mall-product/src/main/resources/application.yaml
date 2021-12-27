@@ -1,19 +1,10 @@
-server:
-  port: 10000
-
 spring:
   datasource:
     username: root
     password: zhaoyuyun
     url: jdbc:mysql://47.98.120.35:3306/yunmall_pms?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
-  # Spring Cloud
-  cloud:
-    nacos:
-      discovery:
-        server-addr: localhost:8848
-  application:
-    name: yunmall-product
+
 
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml
@@ -21,3 +12,11 @@ mybatis-plus:
     db-config:
       # 设置主键自增
       id-type: auto
+      # 设置逻辑删除
+      logic-delete-value: 1     # 逻辑已删除值(默认为 1)
+      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+
+# 开启日志
+logging:
+  level:
+    com.zhao.yunmall: debug

@@ -1,8 +1,6 @@
 package com.zhao.yunmall.product.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -25,7 +23,7 @@ public class CategoryEntity implements Serializable {
 	/**
 	 * 分类id
 	 */
-	@TableId
+	@TableId(type = IdType.AUTO)
 	private Long catId;
 	/**
 	 * 分类名称
@@ -41,7 +39,10 @@ public class CategoryEntity implements Serializable {
 	private Integer catLevel;
 	/**
 	 * 是否显示[0-不显示，1显示]
+	 * 因为我们数据库中的字段为1代表显示，为0代表不显示。与MyBatis-Plus默认规则相反
+	 * 所以需要特殊指定删除规则
 	 */
+	@TableLogic(value = "1", delval = "0")
 	private Integer showStatus;
 	/**
 	 * 排序
