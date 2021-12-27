@@ -9,9 +9,6 @@ spring:
   # Spring Cloud
   cloud:
     nacos:
-      # 服务注册中心
-      discovery:
-        server-addr: localhost:8848
       # 服务配置中心
       config:
         server-addr: localhost:8848

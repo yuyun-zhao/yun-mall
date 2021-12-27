@@ -18,6 +18,13 @@ spring:
             - Path=/api/product/**
           filters:
             - RewritePath=/api/(?<segment>.*), /$\{segment}
+        # 第三方服务的路由规则
+        - id: third-party-route
+          uri: lb://yunmall-third-party
+          predicates:
+            - Path=/api/third-party/**
+          filters:
+            - RewritePath=/api/third-party/(?<segment>.*), /$\{segment}
         # 后台管理系统的路由规则
         - id: admin_route
           uri: lb://renren-fast # 负载均衡到 renren-fast

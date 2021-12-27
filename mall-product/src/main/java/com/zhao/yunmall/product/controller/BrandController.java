@@ -57,7 +57,6 @@ public class BrandController {
      * 保存
      */
     @RequestMapping("/save")
-    //@RequiresPermissions("product:brand:save")
     public R save(@RequestBody BrandEntity brand){
 		brandService.save(brand);
 
@@ -65,10 +64,19 @@ public class BrandController {
     }
 
     /**
-     * 修改
+     * 修改状态信息
+     */
+    @RequestMapping("/update/status")
+    public R updateStatus(@RequestBody BrandEntity brand){
+		brandService.updateById(brand);
+
+        return R.ok();
+    }
+
+    /**
+     * 修改信息
      */
     @RequestMapping("/update")
-    //@RequiresPermissions("product:brand:update")
     public R update(@RequestBody BrandEntity brand){
 		brandService.updateById(brand);
 

@@ -11,20 +11,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
 @Data
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class MallProductApplicationTests {
 
-    @Autowired
-    BrandService brandService;
+	@Autowired
+	BrandService brandService;
 
-    @Test
-    public void contextLoads() {
-        BrandEntity brandEntity = new BrandEntity();
-        brandEntity.setDescript("快手");
+	@Test
+	public void contextLoads() {
+		BrandEntity brandEntity = new BrandEntity();
+		brandEntity.setDescript("快手");
 
-        brandService.save(brandEntity);
-    }
+		brandService.save(brandEntity);
+	}
+
 
 }
