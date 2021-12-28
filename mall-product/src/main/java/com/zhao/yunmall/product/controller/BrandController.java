@@ -1,9 +1,16 @@
 package com.zhao.yunmall.product.controller;
 
+import java.sql.ResultSet;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
+import com.zhao.common.valid.AddGroup;
+import com.zhao.common.valid.UpdateGroup;
+import com.zhao.common.valid.UpdateStatusGroup;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +22,7 @@ import com.zhao.yunmall.product.service.BrandService;
 import com.zhao.common.utils.PageUtils;
 import com.zhao.common.utils.R;
 
+import javax.validation.Valid;
 
 
 /**
@@ -54,20 +62,23 @@ public class BrandController {
     }
 
     /**
-     * 保存
+     * 保存。开启校验注解，校验前端发来的数据是否合法，如果发生异常（不合法），
+     * 将直接被MallExceptionControllerAdvice拦截，其处理完后直接返回给前端
+     * 所属分组：{AddGroup.class}
      */
     @RequestMapping("/save")
-    public R save(@RequestBody BrandEntity brand){
+    public R save(@Validated({AddGroup.class}) @RequestBody BrandEntity brand){
+        // 如果合法再向服务器保存
 		brandService.save(brand);
-
         return R.ok();
     }
 
     /**
-     * 修改状态信息
+     * 修改状态信息。
+     * 所属分组：{UpdateStatusGroup.class}
      */
     @RequestMapping("/update/status")
-    public R updateStatus(@RequestBody BrandEntity brand){
+    public R updateStatus(@Validated({UpdateStatusGroup.class}) @RequestBody BrandEntity brand){
 		brandService.updateById(brand);
 
         return R.ok();
@@ -75,9 +86,10 @@ public class BrandController {
 
     /**
      * 修改信息
+     * 所属分组：{UpdateGroup.class}
      */
     @RequestMapping("/update")
-    public R update(@RequestBody BrandEntity brand){
+    public R update(@Validated({UpdateGroup.class}) @RequestBody BrandEntity brand){
 		brandService.updateById(brand);
 
         return R.ok();
