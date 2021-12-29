@@ -1,5 +1,6 @@
 package com.zhao.yunmall.product.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
@@ -45,4 +46,9 @@ public class AttrGroupEntity implements Serializable {
 	 */
 	private Long catelogId;
 
+	/**
+	 * 当前属性所属商品的分类路径（从一级到三级）
+	 */
+	@TableField(exist = false)
+	private Long[] catelogPath;
 }

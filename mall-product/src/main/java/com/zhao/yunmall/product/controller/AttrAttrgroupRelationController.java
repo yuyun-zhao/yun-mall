@@ -3,6 +3,7 @@ package com.zhao.yunmall.product.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;

@@ -1,7 +1,10 @@
 package com.zhao.yunmall.product.service.impl;
 
+import com.zhao.yunmall.product.service.CategoryBrandRelationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,10 +18,14 @@ import com.zhao.common.utils.Query;
 import com.zhao.yunmall.product.dao.CategoryDao;
 import com.zhao.yunmall.product.entity.CategoryEntity;
 import com.zhao.yunmall.product.service.CategoryService;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service("categoryService")
 public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity> implements CategoryService {
+
+    @Autowired
+    CategoryBrandRelationService relationService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -61,6 +68,45 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
         baseMapper.deleteBatchIds(idList);
 
+    }
+
+    /**
+     * 查询当前属性所属商品的分类路径（从一级到三级）
+     * @param catelogId 当前属性所属商品id
+     * @return 其分类路径
+     */
+    @Override
+    public Long[] findCatelogPath(Long catelogId) {
+        List<Long> paths = new ArrayList<>();
+        // 递归添加当前商品的父商品id
+        findParentPathRecur(catelogId, paths);
+        return paths.toArray(new Long[0]);
+    }
+
+    /**
+     * 级联更新所有关联的数据：先更新商品表，然后更新关联表
+     * 因为涉及到两个表的更新，因此需要添加事务注解，开启事务
+     */
+    @Transactional
+    @Override
+    public void updateCascade(CategoryEntity category) {
+        // 先更新商品表
+        this.updateById(category);
+        // 更新关联表中的数据
+        relationService.updateCategoryName(category.getCatId(), category.getName());
+    }
+
+    /**
+     * 递归添加当前商品的父商品id
+     * @param catelogId 当前商品id
+     * @param paths 添加到结果集合中
+     */
+    public void findParentPathRecur(Long catelogId, List<Long> paths) {
+        CategoryEntity currCategoryEntity = this.getById(catelogId);
+        if (currCategoryEntity.getParentCid() != 0) {
+            findParentPathRecur(currCategoryEntity.getParentCid(), paths);
+        }
+        paths.add(catelogId);
     }
 
     /**

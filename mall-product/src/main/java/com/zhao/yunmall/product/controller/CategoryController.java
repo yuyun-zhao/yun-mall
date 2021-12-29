@@ -76,11 +76,12 @@ public class CategoryController {
     }
 
     /**
-     * 修改
+     * 修改。先修改商品表，然后同步更新关联表中的商品信息
      */
     @RequestMapping("/update")
     public R update(@RequestBody CategoryEntity category){
-		categoryService.updateById(category);
+        // 更新商品表的同时要更新关联表
+		categoryService.updateCascade(category);
         return R.ok();
     }
 

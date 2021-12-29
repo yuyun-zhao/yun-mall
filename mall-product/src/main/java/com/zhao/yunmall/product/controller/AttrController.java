@@ -3,12 +3,10 @@ package com.zhao.yunmall.product.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.zhao.yunmall.product.vo.AttrResponseVo;
+import com.zhao.yunmall.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.zhao.yunmall.product.entity.AttrEntity;
 import com.zhao.yunmall.product.service.AttrService;
@@ -31,49 +29,49 @@ public class AttrController {
     private AttrService attrService;
 
     /**
-     * 列表
+     * 当前端点击左侧三级菜单的某个商品种类时，发出该请求
+     * 根据指定的商品分类id查询该分类对应的属性参数（分为两种："base" 规格参数查询  "sale" 销售参数查询）
      */
-    @RequestMapping("/list")
-    //@RequiresPermissions("product:attr:list")
-    public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = attrService.queryPage(params);
+    @GetMapping("/{attrType}/list/{catelogId}")
+    public R baseAttrList(@RequestParam Map<String, Object> params,
+                          @PathVariable("attrType") String type,
+                          @PathVariable("catelogId") Long catelogId) {
+        // 如果传入的catelogId == 0，代表全部查询，否则就为条件查询
+        PageUtils page = attrService.queryBaseAttrPage(params, type, catelogId);
 
         return R.ok().put("page", page);
     }
 
 
     /**
-     * 信息
+     * 根据传入的属性id，查询出该属性的全部信息以及该属性对应的商品的全父级路径
      */
     @RequestMapping("/info/{attrId}")
-    //@RequiresPermissions("product:attr:info")
     public R info(@PathVariable("attrId") Long attrId){
-		AttrEntity attr = attrService.getById(attrId);
-
-        return R.ok().put("attr", attr);
+        AttrResponseVo respVo = attrService.getAttrInfo(attrId);
+        return R.ok().put("attr", respVo);
     }
 
     /**
-     * 保存
+     * 新增：从前端收集属性参数（包含分组信息），封装到AttrVo对象中
+     * 保存属性值到属性表，并且保存属性信息到关联表
      */
     @RequestMapping("/save")
-    //@RequiresPermissions("product:attr:save")
-    public R save(@RequestBody AttrEntity attr){
-		attrService.save(attr);
-
+    public R save(@RequestBody AttrVo attr){
+		attrService.saveAttr(attr);
         return R.ok();
     }
 
     /**
-     * 修改
+     * 前端发出保存请求，将用户修改后的属性信息、分组信息、商品信息进行保存
      */
     @RequestMapping("/update")
-    //@RequiresPermissions("product:attr:update")
-    public R update(@RequestBody AttrEntity attr){
-		attrService.updateById(attr);
-
+    public R update(@RequestBody AttrVo attr){
+		attrService.updateAttr(attr);
         return R.ok();
     }
+
+
 
     /**
      * 删除
