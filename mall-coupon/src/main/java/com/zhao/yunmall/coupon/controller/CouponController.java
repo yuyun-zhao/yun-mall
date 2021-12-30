@@ -40,19 +40,6 @@ public class CouponController {
         return R.ok().put("coupons", Arrays.asList(couponEntity));
     }
 
-    @Value("${coupon.user.name}")
-    private String name;
-
-    @Value("${coupon.user.age}")
-    private Integer age;
-
-    /**
-     * 测试配置中心
-     */
-    @RequestMapping("/test")
-    public R test() {
-        return R.ok().put("name", name).put("age", age);
-    }
 
     /**
      * 列表

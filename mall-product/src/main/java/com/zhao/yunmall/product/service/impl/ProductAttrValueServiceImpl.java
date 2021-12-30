@@ -3,6 +3,8 @@ package com.zhao.yunmall.product.service.impl;
 import com.zhao.common.utils.PageUtils;
 import com.zhao.common.utils.Query;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -25,5 +27,14 @@ public class ProductAttrValueServiceImpl extends ServiceImpl<ProductAttrValueDao
 
         return new PageUtils(page);
     }
+
+	/**
+	 * 封装好的数据保存到pms_product_attr_value表中
+	 * @param productAttrValueEntities
+	 */
+	@Override
+	public void saveProductAttr(List<ProductAttrValueEntity> productAttrValueEntities) {
+		this.saveBatch(productAttrValueEntities);
+	}
 
 }

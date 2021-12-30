@@ -1,8 +1,12 @@
 package com.zhao.yunmall.product.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zhao.common.utils.PageUtils;
+import com.zhao.common.utils.Query;
 import com.zhao.yunmall.product.entity.SpuInfoEntity;
+import com.zhao.yunmall.product.vo.SpuSaveVo;
 
 import java.util.Map;
 
@@ -15,6 +19,10 @@ import java.util.Map;
  */
 public interface SpuInfoService extends IService<SpuInfoEntity> {
 
-    PageUtils queryPage(Map<String, Object> params);
+	public PageUtils queryPage(Map<String, Object> params);
+
+	void saveSpuInfo(SpuSaveVo spuInfoVo);
+
+	PageUtils queryPageByCondition(Map<String, Object> params);
 }
 

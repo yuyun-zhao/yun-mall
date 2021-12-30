@@ -3,6 +3,7 @@ package com.zhao.yunmall.product.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.zhao.yunmall.product.vo.SpuSaveVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,18 +26,17 @@ import com.zhao.common.utils.R;
  * @date 2021-12-21 16:22:28
  */
 @RestController
-@RequestMapping("product/spuinfo")
+@RequestMapping("/product/spuinfo")
 public class SpuInfoController {
     @Autowired
     private SpuInfoService spuInfoService;
 
     /**
-     * 列表
+     * 查询：根据商品分类id，品牌分类id以及发布状态等信息，查询SPU信息
      */
     @RequestMapping("/list")
-    //@RequiresPermissions("product:spuinfo:list")
     public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = spuInfoService.queryPage(params);
+        PageUtils page = spuInfoService.queryPageByCondition(params);
 
         return R.ok().put("page", page);
     }
@@ -54,12 +54,12 @@ public class SpuInfoController {
     }
 
     /**
-     * 保存
+     * 新增商品时，前端会传来一个非常大的JSON数据，里面包含了SPU的各种信息
+     * 该方法用于解析JSON字符串里的这些参数并分别保存到对应的数据库里
      */
     @RequestMapping("/save")
-    //@RequiresPermissions("product:spuinfo:save")
-    public R save(@RequestBody SpuInfoEntity spuInfo){
-		spuInfoService.save(spuInfo);
+    public R save(@RequestBody SpuSaveVo spuInfoVo){
+		spuInfoService.saveSpuInfo(spuInfoVo);
 
         return R.ok();
     }

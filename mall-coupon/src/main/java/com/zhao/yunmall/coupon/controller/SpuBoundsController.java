@@ -3,6 +3,7 @@ package com.zhao.yunmall.coupon.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.zhao.common.to.SpuBoundTo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -58,8 +59,8 @@ public class SpuBoundsController {
      */
     @RequestMapping("/save")
     //@RequiresPermissions("coupon:spubounds:save")
-    public R save(@RequestBody SpuBoundsEntity spuBounds){
-		spuBoundsService.save(spuBounds);
+    public R save(@RequestBody SpuBoundsEntity spuBoundsEntity){
+		spuBoundsService.save(spuBoundsEntity);
 
         return R.ok();
     }

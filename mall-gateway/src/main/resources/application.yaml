@@ -32,6 +32,13 @@ spring:
             - Path=/api/member/**
           filters:
             - RewritePath=/api/(?<segment>.*), /$\{segment}
+        # 库存服务的路由规则
+        - id: ware-route
+          uri: lb://yunmall-ware
+          predicates:
+            - Path=/api/ware/**
+          filters:
+            - RewritePath=/api/(?<segment>.*), /$\{segment}
         # 后台管理系统的路由规则
         - id: admin_route
           uri: lb://renren-fast # 负载均衡到 renren-fast

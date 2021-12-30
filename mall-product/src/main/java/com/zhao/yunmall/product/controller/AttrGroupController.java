@@ -10,6 +10,7 @@ import com.zhao.yunmall.product.service.AttrAttrgroupRelationService;
 import com.zhao.yunmall.product.service.AttrService;
 import com.zhao.yunmall.product.service.CategoryService;
 import com.zhao.yunmall.product.vo.AttrGroupRelationVo;
+import com.zhao.yunmall.product.vo.AttrGroupWithAttrsVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -104,6 +105,21 @@ public class AttrGroupController {
         relationService.saveBatch(vos);
         return R.ok();
     }
+
+    /**
+     * 虎丘当前商品所关联的属性分组以及所有属性信息
+     * @param catelogId
+     * @return
+     */
+    @GetMapping("/{catelogId}/withattr")
+    public R getAttrGroupWithAttrs(@PathVariable("catelogId") Long catelogId) {
+        // 1. 查出当前商品分类下的所有属性分组
+        // 2. 查出每个属性分组的所有属性
+        List<AttrGroupWithAttrsVo> vos =  attrGroupService.getAttrGroupWithAttrsByCatelogId(catelogId);
+        return R.ok().put("data", vos);
+    }
+
+
 
     /**
      * 保存

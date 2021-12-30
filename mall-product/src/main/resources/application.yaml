@@ -18,7 +18,8 @@ spring:
       secret-key: Bylo34G1xcs3cnQejXC4tpuJ0Ybrkw
       oss:
         endpoint: oss-cn-hangzhou.aliyuncs.com
-
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
 
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml
@@ -34,3 +35,4 @@ mybatis-plus:
 logging:
   level:
     com.zhao.yunmall: debug
+
