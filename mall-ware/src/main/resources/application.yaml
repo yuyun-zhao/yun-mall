@@ -14,7 +14,9 @@ spring:
         server-addr: localhost:8848
   application:
     name: yunmall-ware
-
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
 
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml
@@ -22,3 +24,8 @@ mybatis-plus:
     db-config:
       # 设置主键自增
       id-type: auto
+
+logging:
+  level:
+    com.zhao.yunmall: debug
+

@@ -1,5 +1,7 @@
 package com.zhao.yunmall.ware.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
@@ -56,10 +58,13 @@ public class PurchaseEntity implements Serializable {
 	/**
 	 * 
 	 */
+	@TableField(fill = FieldFill.INSERT) //创建时自动填充
 	private Date createTime;
 	/**
 	 * 
 	 */
+	@TableField(fill = FieldFill.INSERT_UPDATE) //创建与修改时自动填充
 	private Date updateTime;
+
 
 }

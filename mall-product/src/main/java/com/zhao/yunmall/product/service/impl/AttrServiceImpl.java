@@ -3,7 +3,7 @@ package com.zhao.yunmall.product.service.impl;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.zhao.common.utils.PageUtils;
 import com.zhao.common.utils.Query;
-import com.zhao.yunmall.product.constant.ProductConstant;
+import com.zhao.common.constant.ProductConstant;
 import com.zhao.yunmall.product.dao.AttrAttrgroupRelationDao;
 import com.zhao.yunmall.product.dao.AttrGroupDao;
 import com.zhao.yunmall.product.dao.CategoryDao;

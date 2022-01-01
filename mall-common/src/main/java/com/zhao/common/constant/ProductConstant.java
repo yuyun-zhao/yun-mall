@@ -1,4 +1,4 @@
-package com.zhao.yunmall.product.constant;
+package com.zhao.common.constant;
 
 /**
  * @author yuyun zhao
@@ -22,8 +22,6 @@ public class ProductConstant {
 		public String getMsg() {
 			return this.msg;
 		}
-
-
 	}
 
 }

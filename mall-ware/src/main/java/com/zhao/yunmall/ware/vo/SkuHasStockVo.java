@@ -1,11 +1,12 @@
-package com.zhao.common.to;
+package com.zhao.yunmall.ware.vo;
 
 import lombok.Data;
 
 /**
  * @author: yuyun.zhao
- * @date: 2021/3/13 10:21
- */
+ * @createTime: 2020-06-06 15:38
+ **/
+
 @Data
 public class SkuHasStockVo {
 
