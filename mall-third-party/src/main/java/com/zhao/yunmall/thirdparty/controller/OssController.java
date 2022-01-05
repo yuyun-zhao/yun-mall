@@ -39,6 +39,7 @@ public class OssController {
 	 * 签名方法
 	 * @return 返回给前端JSON字符串，注意必须封装成R对象，因为和前端的通讯协议里，都是从response.data中获取数据
 	 */
+
 	@RequestMapping("/oss/policy")
 	public R policy() {
 		String host = "https://" + bucket + "." + endpoint; // host的格式为 bucketname.endpoint

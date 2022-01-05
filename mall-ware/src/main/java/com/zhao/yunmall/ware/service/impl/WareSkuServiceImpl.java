@@ -90,7 +90,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
 
     @Override
     public List<SkuHasStockVo> getSkuHasStock(List<Long> skuIds) {
-
+        // 遍历每一个sku，判断其是否还有库存，如果有就设置为true
         return skuIds.stream().map(item -> {
             Long count = this.baseMapper.getSkuStock(item);
             SkuHasStockVo skuHasStockVo = new SkuHasStockVo();

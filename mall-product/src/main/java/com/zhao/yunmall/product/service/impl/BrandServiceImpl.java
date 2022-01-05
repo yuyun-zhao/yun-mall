@@ -1,6 +1,5 @@
 package com.zhao.yunmall.product.service.impl;
 
-import com.zhao.yunmall.product.dao.CategoryBrandRelationDao;
 import com.zhao.yunmall.product.service.CategoryBrandRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,6 +53,11 @@ public class BrandServiceImpl extends ServiceImpl<BrandDao, BrandEntity> impleme
             relationService.updateBrandName(brand.getBrandId(), brand.getName());
             // TODO 更新其他关联表
         }
+    }
+
+    @Override
+    public BrandEntity getById(Long brandId) {
+        return this.baseMapper.selectById(brandId);
     }
 
 }
