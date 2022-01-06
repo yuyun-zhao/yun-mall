@@ -17,3 +17,4 @@ buildNumber.properties
 **/target/
 .idea
 **/.gitignore
+mall-third-party/src/main/resources/

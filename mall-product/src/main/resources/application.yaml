@@ -20,6 +20,13 @@ spring:
         endpoint: oss-cn-hangzhou.aliyuncs.com
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
+  thymeleaf:
+    cache: false   # 开发期间关闭缓存
+  resources:
+    static-locations: [classpath:/static/]
+  mvc:
+    static-path-pattern: /static/**
+
 
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml
@@ -35,4 +42,6 @@ mybatis-plus:
 logging:
   level:
     com.zhao.yunmall: debug
+
+
 

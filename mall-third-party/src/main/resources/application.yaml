@@ -8,8 +8,4 @@ spring:
       discovery:
         server-addr: localhost:8848
     alicloud:
-      access-key: LTAI5tPg8hhbq8wNcjPS9uiv
-      secret-key: Bylo34G1xcs3cnQejXC4tpuJ0Ybrkw
-      oss:
-        endpoint: oss-cn-hangzhou.aliyuncs.com
-        bucket: yunmall-project
+      # 配置在Nacos中
