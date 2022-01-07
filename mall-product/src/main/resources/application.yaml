@@ -7,17 +7,18 @@ spring:
     password: zhaoyuyun
     url: jdbc:mysql://47.98.120.35:3306/yunmall_pms?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
+  redis:
+    host: yuyunzhao.cn
+    port: 6379
+    password: zhaoyuyun # 设置密码防止被别人利用
+
+
   cloud:
     # 服务注册中心
     nacos:
       discovery:
         server-addr: localhost:8848
-    ## 阿里云 OSS
-    alicloud:
-      access-key: LTAI5tPg8hhbq8wNcjPS9uiv
-      secret-key: Bylo34G1xcs3cnQejXC4tpuJ0Ybrkw
-      oss:
-        endpoint: oss-cn-hangzhou.aliyuncs.com
+
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
   thymeleaf:
@@ -25,7 +26,7 @@ spring:
   resources:
     static-locations: [classpath:/static/]
   mvc:
-    static-path-pattern: /static/**
+    static-path-pattern: /static/**  # 因为所有的请求都额外带了前缀 /static/，为了后期动静分离
 
 
 mybatis-plus:
@@ -41,7 +42,8 @@ mybatis-plus:
 # 开启日志
 logging:
   level:
-    com.zhao.yunmall: debug
+    com.zhao.yunmall: error  # 服务上线后，设置为 error
+
 
 
 

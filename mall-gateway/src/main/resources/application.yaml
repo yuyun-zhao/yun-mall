@@ -47,7 +47,12 @@ spring:
           filters:
             # 前端发来的请求 /api/... 被重写成 /renren-fast/...
             - RewritePath=/api/(?<segment>.*), /renren-fast/$\{segment}
-
+        # Nginx 路由到网关，注意需要放在最后面，因为路由规则是匹配域名，一旦匹配到了域名，就全会匹配当前路由规则
+        # 导致无法再匹配其他路由规则。即host规则要放在path规则后，host更加粗粒度
+        - id: yunmall-host-route
+          uri: lb://yunmall-product
+          predicates:
+            - Host=**.yuyunzhao.cn
 
 
 ## 前端项目发来的请求都带有 /api 前缀。转发到路由服务后，需要重写路径，将 /api 前缀给去掉

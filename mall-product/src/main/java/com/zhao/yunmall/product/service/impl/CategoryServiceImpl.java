@@ -1,8 +1,11 @@
 package com.zhao.yunmall.product.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.zhao.yunmall.product.service.CategoryBrandRelationService;
 import com.zhao.yunmall.product.vo.Catalog2Vo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -18,6 +21,7 @@ import com.zhao.yunmall.product.dao.CategoryDao;
 import com.zhao.yunmall.product.entity.CategoryEntity;
 import com.zhao.yunmall.product.service.CategoryService;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 
 @Service("categoryService")
@@ -25,6 +29,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
 	@Autowired
 	CategoryBrandRelationService relationService;
+
+	@Autowired
+	StringRedisTemplate redisTemplate;
 
 	@Override
 	public PageUtils queryPage(Map<String, Object> params) {
@@ -106,8 +113,53 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 		return this.baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", 0));
 	}
 
+	/**
+	 * 先查缓存，如果缓存没命中再去数据库查
+	 * TODO 可能产生堆外内存溢出问题 OutOfDirectMemoryError
+	 *  1. SpringBoot 2.0 默认使用 lettuce 作为 Redis 客户端，它使用 netty 进行网络通信
+	 *  2. 因为 lettuce 的 bug 导致 netty 堆外内存溢出
+	 *  3. netty 如果没有指定堆外内存大小，则默认使用 -Xmx 里设置的大小。因为内存没有及时释放
+	 *  4. 可以通过 -Dio.netty.maxDirectMemory 设置堆外内存
+	 *  解决方案：不能仅通过增大 -Dio.netty.maxDirectMemory 来解决，因为内存总会占满
+	 *  1. 升级 lettuce 客户端 （新版没有）
+	 *  2. 使用 jedis
+	 *
+	 * lettuce 和 jedis 都是操作 redis 的底层客户端
+	 * Spring 在二者的基础上进行了二次封装，就得到了 reidstemplate
+	 * @return
+	 */
 	@Override
 	public Map<String, List<Catalog2Vo>> getCatalogJson() {
+		/**
+		 * 1. 空结果缓存：解决缓存穿透
+		 * 2. 设置过期时间（加随机值）：解决缓存雪崩
+		 * 3. 加锁：解决缓存击穿
+		 *
+		 */
+		// 序列化：先将Java对象转成JSON字符串，然后向缓存中存储JSON字符串，
+		// 反序列化：读取时也是读取出JSON字符串，再转成Java对象使用
+		String catalogJSON = redisTemplate.opsForValue().get("catalogJSON");
+		if (StringUtils.isEmpty(catalogJSON)) {
+			// 缓存如果没命中
+			Map<String, List<Catalog2Vo>> catalogJsonFromDB = getCatalogJsonFromDB();
+			// 将Java对象转换成JSON字符串
+			String s = JSON.toJSONString(catalogJsonFromDB);
+			// 将查询到的数据放入缓存
+			redisTemplate.opsForValue().set("catalogJSON", s);
+			return catalogJsonFromDB;
+		}
+
+		// 将缓存中的JSON字符串转换成实际对象。其中，TypeReference 以匿名内部类的形式创建
+		Map<String, List<Catalog2Vo>> result = JSON.parseObject(catalogJSON, new TypeReference<Map<String, List<Catalog2Vo>>>() {
+		});
+		return result;
+	}
+
+	/**
+	 * 从数据库中查数据并进行封装
+	 * @return
+	 */
+	public Map<String, List<Catalog2Vo>> getCatalogJsonFromDB() {
 		// 1. 查出二级分类
 		List<CategoryEntity> categoryEntities = this.list(new QueryWrapper<CategoryEntity>().eq("cat_level", 2));
 
