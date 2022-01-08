@@ -4,7 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.zhao.yunmall.product.service.CategoryBrandRelationService;
 import com.zhao.yunmall.product.vo.Catalog2Vo;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +38,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
 	@Autowired
 	StringRedisTemplate redisTemplate;
+
+	@Autowired
+	RedissonClient redissonClient;
 
 	@Override
 	public PageUtils queryPage(Map<String, Object> params) {
@@ -93,7 +102,25 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 	/**
 	 * 级联更新所有关联的数据：先更新商品表，然后更新关联表
 	 * 因为涉及到两个表的更新，因此需要添加事务注解，开启事务
+	 * @CacheEvict 失效模式：当修改了商品数据后，就将其缓存数据清空。下次再查询时再将其加入到缓存中
+	 * @Caching 进行组合，可以同时进行多种缓存操作
+	 * @CacheEvict(value = {"category", "product"}, allEntries = true) 同时删掉该分区下的所有缓存。该分区并不在Redis中，只是在Spring CacheManger内进行分区的
+	 *
+	 * 约定：存储同一类型的数据都存储在同一个分区下。分区名默认就是缓存的前缀，效果 category:value，
+	 * 例如下面这个例子存储的key就是：category:getCatalogJson。这样在 Redis 的可视化界面里，存储的效果就类似于分组了
+	 * 前提是不指定prefix前缀，就会这个效果
+	 * 这时截个图
+	 *
+	 * @CachePut // 双写模式可以使用该接口。当更新完数据后，再立即put更新一次 ，要求方法必须有返回值，因为要拿着这个返回值再去写到缓存中
+	 * @CacheEvict 失效模式，方法不需要有返回值
+	 * SpEl 表达式里，如果是直接取值，就加 'xxx'
 	 */
+	// @CacheEvict(value = {"category", "product"}, key = "'getCategoryLevel1'") 只能写单个key
+	// @CachePut // 双写模式可以使用该接口。当更新完数据后，再立即put更新一次
+	@Caching(evict = {
+			@CacheEvict(value = {"category", "product"}, key = "'getCategoryLevel1'"),
+			@CacheEvict(value = {"category", "product"}, key = "'getCatalogJson'")
+	})
 	@Transactional
 	@Override
 	public void updateCascade(CategoryEntity category) {
@@ -105,12 +132,34 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
 	/**
 	 * 获取一级分类
+	 * @Cacheable 代表当前方法的结果需要缓存。如果缓存中有，方法就不会被调用，如果缓存中没有就会调用方法再将调用结果放到缓存中
+	 * 原理应该也是AOP，如果缓存有直接不执行该方法的内容了
+	 * 每一个需要缓存的数据，都要指定该数据要放到哪个名字的缓存中【缓存的区分（按照业务类型分区）】
+	 *
+	 * key: SpEL表达式动态取值。可以指定具体的key。否则默认是SimpleKey
+	 * SpEl 表达式里，如果是直接取值，就加 'xxx'
+	 * SpEl 的详细配置见文档
+	 *
+	 * sync = true 开启本地锁，默认是不开启的
 	 *
 	 * @return
 	 */
+	@Cacheable(value = {"category", "product"}, key = "#root.method.name", sync = true)
 	@Override
 	public List<CategoryEntity> getCategoryLevel1() {
+		System.out.println("方法执行了");
 		return this.baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", 0));
+	}
+
+	/**
+	 * 使用注解自动添加缓存
+	 * @return
+	 */
+	@Cacheable(value = {"category", "product"}, key = "#root.method.name")
+	@Override
+	public Map<String, List<Catalog2Vo>> getCatalogJson() {
+		// 不需要再手动写缓存的代码了
+		return getCatalogJsonFromDB();
 	}
 
 	/**
@@ -128,8 +177,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 	 * Spring 在二者的基础上进行了二次封装，就得到了 reidstemplate
 	 * @return
 	 */
-	@Override
-	public Map<String, List<Catalog2Vo>> getCatalogJson() {
+	//@Override
+	public Map<String, List<Catalog2Vo>> getCatalogJsonRedis() {
 		/**
 		 * 1. 空结果缓存：解决缓存穿透
 		 * 2. 设置过期时间（加随机值）：解决缓存雪崩
@@ -138,13 +187,15 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 		 */
 		// 序列化：先将Java对象转成JSON字符串，然后向缓存中存储JSON字符串，
 		// 反序列化：读取时也是读取出JSON字符串，再转成Java对象使用
+
+		// 1. 先查询是否有缓存
 		String catalogJSON = redisTemplate.opsForValue().get("catalogJSON");
 		if (StringUtils.isEmpty(catalogJSON)) {
-			// 缓存如果没命中
+			// 2. 缓存如果没命中，去数据库里查数据
 			Map<String, List<Catalog2Vo>> catalogJsonFromDB = getCatalogJsonFromDB();
 			// 将Java对象转换成JSON字符串
 			String s = JSON.toJSONString(catalogJsonFromDB);
-			// 将查询到的数据放入缓存
+			// 3. 将查询到的数据放入缓存
 			redisTemplate.opsForValue().set("catalogJSON", s);
 			return catalogJsonFromDB;
 		}
@@ -154,6 +205,27 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 		});
 		return result;
 	}
+
+
+	/**
+	 * 查缓存是否存在前先加分布式锁
+	 * @return
+	 */
+	public Map<String, List<Catalog2Vo>> getCatalogJsonFromDBWithRedissonLock() {
+		// 1. 去redis中占分布式锁
+		RLock lock = redissonClient.getLock("catalogJson-lock");
+		lock.lock();
+
+		Map<String, List<Catalog2Vo>> catalogJsonFromDB;
+		try {
+			// 2. 加锁后，再检查一下缓存中是否有了该数据，如果缓存里仍没有，再去数据库里查
+			catalogJsonFromDB = getCatalogJson();
+		} finally {
+			lock.unlock();
+		}
+		return catalogJsonFromDB;
+	}
+
 
 	/**
 	 * 从数据库中查数据并进行封装
@@ -187,7 +259,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 			catalogMap.put(catalog2Vo.getCatalog1Id(), list);
 		}
 		return catalogMap;
-
 	}
 
 	/**

@@ -11,14 +11,20 @@ spring:
     host: yuyunzhao.cn
     port: 6379
     password: zhaoyuyun # 设置密码防止被别人利用
-
+  cache:
+    type: redis  # 配置使用 Redis 进行缓存
+    # cache-names:   # 如果没配名字，就按照系统中用到的缓存进行起名
+    redis:
+      time-to-live: 360000       # 设置过期时间，单位是 ms
+      # key-prefix: CACHE_       # key 前缀，推荐不指定，这样分区名（value）默认就是缓存的前缀
+      use-key-prefix: true       # 是否使用写入 Redis 前缀
+      cache-null-values: true    # 是否允许缓存空值，可用于防止缓存穿透
 
   cloud:
     # 服务注册中心
     nacos:
       discovery:
         server-addr: localhost:8848
-
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
   thymeleaf:
