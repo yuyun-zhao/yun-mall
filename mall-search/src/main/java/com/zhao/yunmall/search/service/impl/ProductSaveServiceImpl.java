@@ -38,6 +38,7 @@ public class ProductSaveServiceImpl implements ProductSaveService {
 	@Override
 	public boolean productStatusUp(List<SkuEsModel> skuEsModelList) throws IOException {
 		// 1. 先创建索引: product，并建立好映射关系
+		// 事先创建好索引，包括每个字段的类型
 
 		// 2. 在ES中保存这些数据
 		BulkRequest bulkRequest = new BulkRequest();

@@ -136,15 +136,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 	 * 原理应该也是AOP，如果缓存有直接不执行该方法的内容了
 	 * 每一个需要缓存的数据，都要指定该数据要放到哪个名字的缓存中【缓存的区分（按照业务类型分区）】
 	 *
-	 * key: SpEL表达式动态取值。可以指定具体的key。否则默认是SimpleKey
-	 * SpEl 表达式里，如果是直接取值，就加 'xxx'
-	 * SpEl 的详细配置见文档
-	 *
-	 * sync = true 开启本地锁，默认是不开启的
-	 *
 	 * @return
 	 */
-	@Cacheable(value = {"category", "product"}, key = "#root.method.name", sync = true)
+	@Cacheable(value = {"category"}, key = "#root.method.name", sync = true)
 	@Override
 	public List<CategoryEntity> getCategoryLevel1() {
 		System.out.println("方法执行了");
@@ -177,13 +171,14 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 	 * Spring 在二者的基础上进行了二次封装，就得到了 reidstemplate
 	 * @return
 	 */
-	//@Override
-	public Map<String, List<Catalog2Vo>> getCatalogJsonRedis() {
+	/**
+	 * 先查询缓存是否存在，如果存在就直接返回，否则先加上分布式锁，然后再去数据库里查
+	 */
+	public Map<String, List<Catalog2Vo>> getCatalogJsonWithRedis() {
 		/**
-		 * 1. 空结果缓存：解决缓存穿透
+		 * 1. 空结果缓存（或布隆过滤器）：解决缓存穿透
 		 * 2. 设置过期时间（加随机值）：解决缓存雪崩
 		 * 3. 加锁：解决缓存击穿
-		 *
 		 */
 		// 序列化：先将Java对象转成JSON字符串，然后向缓存中存储JSON字符串，
 		// 反序列化：读取时也是读取出JSON字符串，再转成Java对象使用
@@ -191,8 +186,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 		// 1. 先查询是否有缓存
 		String catalogJSON = redisTemplate.opsForValue().get("catalogJSON");
 		if (StringUtils.isEmpty(catalogJSON)) {
-			// 2. 缓存如果没命中，去数据库里查数据
-			Map<String, List<Catalog2Vo>> catalogJsonFromDB = getCatalogJsonFromDB();
+			// 2. 缓存如果没命中，先加上分布式锁，然后再去数据库里查数据
+			Map<String, List<Catalog2Vo>> catalogJsonFromDB = getCatalogJsonFromDBWithRedissonLock();
 			// 将Java对象转换成JSON字符串
 			String s = JSON.toJSONString(catalogJsonFromDB);
 			// 3. 将查询到的数据放入缓存
@@ -206,21 +201,22 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 		return result;
 	}
 
-
 	/**
-	 * 查缓存是否存在前先加分布式锁
+	 * 对于某些可能会过期的key，先添加分布式锁，再去Redis查询缓存是否存在，就能解决缓存击穿的问题
+	 * 使用Redisson操作分布式锁
 	 * @return
 	 */
 	public Map<String, List<Catalog2Vo>> getCatalogJsonFromDBWithRedissonLock() {
-		// 1. 去redis中占分布式锁
+		// 1. 原子性加锁，其内会自动设置过期时间（看门狗+自动续期机制）。也可以手动指定过期时间
 		RLock lock = redissonClient.getLock("catalogJson-lock");
 		lock.lock();
 
 		Map<String, List<Catalog2Vo>> catalogJsonFromDB;
 		try {
 			// 2. 加锁后，再检查一下缓存中是否有了该数据，如果缓存里仍没有，再去数据库里查
-			catalogJsonFromDB = getCatalogJson();
+			catalogJsonFromDB = getCatalogJsonFromDB();
 		} finally {
+			// 2. 最后原子性解锁
 			lock.unlock();
 		}
 		return catalogJsonFromDB;
