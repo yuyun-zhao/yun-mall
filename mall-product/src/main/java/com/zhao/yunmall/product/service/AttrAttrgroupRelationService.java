@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.zhao.common.utils.PageUtils;
 import com.zhao.yunmall.product.entity.AttrAttrgroupRelationEntity;
 import com.zhao.yunmall.product.vo.AttrGroupRelationVo;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
@@ -20,5 +21,7 @@ public interface AttrAttrgroupRelationService extends IService<AttrAttrgroupRela
     PageUtils queryPage(Map<String, Object> params);
 
 	void saveBatch(List<AttrGroupRelationVo> vos);
+
+	List<Long> getAttrIds(Long attrGroupId);
 }
 

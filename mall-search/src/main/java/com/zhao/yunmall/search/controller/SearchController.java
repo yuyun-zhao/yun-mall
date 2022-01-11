@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @author yuyun zhao
  * @date 2022/1/9 16:57
@@ -23,12 +25,12 @@ public class SearchController {
 	 * @param searchParam
 	 * @return
 	 */
-	@GetMapping("/list.html")
-	public String listPage(SearchParam searchParam, Model model) {
-		// 根据前端传递来的查询参数去 ES 里检索商品
-		SearchResult result = mallSearchService.search(searchParam);
+	@GetMapping(value = {"/search.html","/"})
+	public String getSearchPage(SearchParam searchParam, Model model, HttpServletRequest request) {
+		// 获取前端传来的完整查询条件
+		searchParam.set_queryString(request.getQueryString());
+		SearchResult result = mallSearchService.getSearchResult(searchParam);
 		model.addAttribute("result", result);
-		// 跳转到 templates/list.html 页面
-		return "list";
+		return "search";
 	}
 }

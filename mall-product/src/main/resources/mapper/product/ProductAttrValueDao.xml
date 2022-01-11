@@ -4,15 +4,19 @@
 <mapper namespace="com.zhao.yunmall.product.dao.ProductAttrValueDao">
 
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap type="com.zhao.yunmall.product.entity.ProductAttrValueEntity" id="productAttrValueMap">
-        <result property="id" column="id"/>
-        <result property="spuId" column="spu_id"/>
+    <resultMap type="com.zhao.yunmall.product.vo.Attr" id="productAttrValueMap">
         <result property="attrId" column="attr_id"/>
         <result property="attrName" column="attr_name"/>
         <result property="attrValue" column="attr_value"/>
-        <result property="attrSort" column="attr_sort"/>
-        <result property="quickShow" column="quick_show"/>
     </resultMap>
 
+    <select id="getAttr" resultMap="productAttrValueMap">
+        select `attr_id`,`attr_name`,`attr_value` from `pms_product_attr_value`
+        where `spu_id` = #{spuId} and `attr_id` in
+        <foreach collection="attrIds" item="id" index="index"
+                 open="(" close=")" separator=",">
+        #{id}
+        </foreach>
+    </select>
 
 </mapper>

@@ -2,6 +2,7 @@ package com.zhao.yunmall.product.service.impl;
 
 import com.zhao.common.utils.PageUtils;
 import com.zhao.common.utils.Query;
+import com.zhao.yunmall.product.vo.Attr;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,4 +43,7 @@ public class ProductAttrValueServiceImpl extends ServiceImpl<ProductAttrValueDao
 		return this.baseMapper.selectList(new QueryWrapper<ProductAttrValueEntity>().eq("spu_id", spuId));
 	}
 
+	public List<Attr> getAttr(Long spuId, List<Long> attrIds) {
+		return this.baseMapper.getAttr(spuId, attrIds);
+	}
 }

@@ -184,25 +184,25 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 		// 反序列化：读取时也是读取出JSON字符串，再转成Java对象使用
 
 		// 1. 先查询是否有缓存
-		String catalogJSON = redisTemplate.opsForValue().get("catalogJSON");
-		if (StringUtils.isEmpty(catalogJSON)) {
+		String cache = redisTemplate.opsForValue().get("catalogJSON");
+		if (StringUtils.isEmpty(cache)) {
 			// 2. 缓存如果没命中，先加上分布式锁，然后再去数据库里查数据
-			Map<String, List<Catalog2Vo>> catalogJsonFromDB = getCatalogJsonFromDBWithRedissonLock();
+			Map<String, List<Catalog2Vo>> catalogJson = getCatalogJsonFromDBWithRedissonLock();
 			// 将Java对象转换成JSON字符串
-			String s = JSON.toJSONString(catalogJsonFromDB);
+			String s = JSON.toJSONString(catalogJson);
 			// 3. 将查询到的数据放入缓存
 			redisTemplate.opsForValue().set("catalogJSON", s);
-			return catalogJsonFromDB;
+			return catalogJson;
 		}
 
 		// 将缓存中的JSON字符串转换成实际对象。其中，TypeReference 以匿名内部类的形式创建
-		Map<String, List<Catalog2Vo>> result = JSON.parseObject(catalogJSON, new TypeReference<Map<String, List<Catalog2Vo>>>() {
+		Map<String, List<Catalog2Vo>> result = JSON.parseObject(cache, new TypeReference<Map<String, List<Catalog2Vo>>>() {
 		});
 		return result;
 	}
 
 	/**
-	 * 对于某些可能会过期的key，先添加分布式锁，再去Redis查询缓存是否存在，就能解决缓存击穿的问题
+	 * 如果Redis中缓存不存在，先加上分布式锁，然后再查数据库
 	 * 使用Redisson操作分布式锁
 	 * @return
 	 */
@@ -213,10 +213,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
 		Map<String, List<Catalog2Vo>> catalogJsonFromDB;
 		try {
-			// 2. 加锁后，再检查一下缓存中是否有了该数据，如果缓存里仍没有，再去数据库里查
+			// 2. 加锁后，去数据库里查数据
 			catalogJsonFromDB = getCatalogJsonFromDB();
 		} finally {
-			// 2. 最后原子性解锁
+			// 3. 最后原子性解锁
 			lock.unlock();
 		}
 		return catalogJsonFromDB;

@@ -47,4 +47,10 @@ public class AttrAttrgroupRelationServiceImpl extends ServiceImpl<AttrAttrgroupR
 		this.saveBatch(relationEntities);
 	}
 
+	@Override
+	public List<Long> getAttrIds(Long attrGroupId) {
+		return this.baseMapper.getAttrIds(attrGroupId);
+	}
+
+
 }

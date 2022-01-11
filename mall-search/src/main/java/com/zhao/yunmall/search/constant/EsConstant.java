@@ -7,4 +7,5 @@ package com.zhao.yunmall.search.constant;
 public class EsConstant {
 	// sku 数据在 es 中的索引名称
 	public static final String PRODUCT_INDEX = "product";
+	public static final Integer PRODUCT_PAGESIZE = 2;
 }

@@ -48,7 +48,7 @@ mybatis-plus:
 # 开启日志
 logging:
   level:
-    com.zhao.yunmall: error  # 服务上线后，设置为 error
+    com.zhao.yunmall: debug  # 服务上线后，设置为 error
 
 
 

@@ -47,7 +47,7 @@ public class SearchParam {
 	private List<String> attrs;
 
 	/**
-	 * 页码
+	 * 页码，默认为1
 	 */
 	private Integer pageNum = 1;
 
