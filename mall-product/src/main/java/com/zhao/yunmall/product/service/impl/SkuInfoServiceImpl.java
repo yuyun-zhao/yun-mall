@@ -14,6 +14,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -37,6 +41,8 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
 	@Autowired
 	SkuSaleAttrValueService skuSaleAttrValueService;
 
+	@Autowired
+	ThreadPoolExecutor executor;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -122,36 +128,50 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
 	}
 
 	@Override
-	public SkuItemVo item(Long skuId) {
+	public SkuItemVo item(Long skuId) throws ExecutionException, InterruptedException {
 		SkuItemVo skuItemVo = new SkuItemVo();
-		// 1. 当前sku的基本信息获取，从pms_sku_info表中查
-		SkuInfoEntity skuInfoEntity = this.getById(skuId);
-		skuItemVo.setInfo(skuInfoEntity);
 
-		if (skuInfoEntity == null) {
-			return null;
-		}
+		// 任务1：获取当前sku的基本信息（从pms_sku_info表中查）
+		// 该任务的的执行结果需要传给后面的三个子任务，所以需要设置为supplyAsync模式，为下面的三个任务提供info信息
+		CompletableFuture<SkuInfoEntity> infoFuture = CompletableFuture.supplyAsync(() -> {
+			SkuInfoEntity skuInfoEntity = this.getById(skuId);
+			skuItemVo.setInfo(skuInfoEntity);
+			// 后面的三个子任务需要用到该信息，所以要返回出去
+			return skuInfoEntity;
+		}, executor);
 
-		// 准备几个关键的id在下面进行查询
-		Long catalogId = skuInfoEntity.getCatalogId();
-		Long spuId = skuInfoEntity.getSpuId();
+		// 下面的三个子任务必须在任务1执行完毕后执行，并且相互之间是并行执行的，
+		// 三者都需要任务1提供的参数，并且自身不向外提供参数，所以使用acceptAsync模式
 
+		// 1.1 获取当前sku所属的spu的所有销售属性组合，展示在界面上
+		CompletableFuture<Void> saleAttrFuture = infoFuture.thenAcceptAsync(info -> {
+			List<SkuItemSaleAttrVo> saleAttrVos = skuSaleAttrValueService.listSaleAttrs(info.getSpuId());
+			skuItemVo.setSaleAttr(saleAttrVos);
+		}, executor);
+
+		// 1.2 获取当前sku所属的spu的介绍信息，从pms_spu_info_desc表中查
+		CompletableFuture<Void> descFuture = infoFuture.thenAcceptAsync(info -> {
+			SpuInfoDescEntity spuInfoDescEntity = spuInfoDescService.getById(info.getSpuId());
+			skuItemVo.setDesc(spuInfoDescEntity);
+		}, executor);
+
+		// 1.3 获取spu的规格参数（基本属性）信息
+		CompletableFuture<Void> baseAttrFuture = infoFuture.thenAcceptAsync(info -> {
+			List<SpuItemAttrGroupVo> attrGroupVos = attrGroupService.getAttrGroupWithAttrsBySpuId(info.getSpuId(), info.getCatalogId());
+			skuItemVo.setGroupAttrs(attrGroupVos);
+		}, executor);
+
+
+		// 任务2和上面的四个任务都没关系
 		// 2. 当前sku的图片信息，从pms_sku_images表中查
-		List<SkuImagesEntity> imagesEntities = imagesService.getImagesBySkuId(skuId);
-		skuItemVo.setImages(imagesEntities);
+		CompletableFuture<Void> imagesFuture = CompletableFuture.runAsync(() -> {
+			List<SkuImagesEntity> imagesEntities = imagesService.getImagesBySkuId(skuId);
+			skuItemVo.setImages(imagesEntities);
+		}, executor);
 
-		// 3. 获取当前sku所属的spu的所有销售属性组合，展示在界面上
-		List<SkuItemSaleAttrVo> saleAttrVos = skuSaleAttrValueService.listSaleAttrs(spuId);
-		skuItemVo.setSaleAttr(saleAttrVos);
 
-		// 4. 获取当前sku所属的spu的介绍信息，从pms_spu_info_desc表中查
-		SpuInfoDescEntity spuInfoDescEntity = spuInfoDescService.getById(spuId);
-		skuItemVo.setDesc(spuInfoDescEntity);
-
-		// 5. 获取spu的规格参数（基本属性）信息
-		List<SpuItemAttrGroupVo> attrGroupVos = attrGroupService.getAttrGroupWithAttrsBySpuId(spuId, catalogId);
-		skuItemVo.setGroupAttrs(attrGroupVos);
-
+		//  阻塞等待所有任务都执行完毕才能返回skuItemVo，所以要用allOf().get()
+		CompletableFuture.allOf(saleAttrFuture, descFuture, baseAttrFuture, imagesFuture).get();
 
 		return skuItemVo;
 	}

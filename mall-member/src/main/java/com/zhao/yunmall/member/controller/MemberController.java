@@ -3,13 +3,14 @@ package com.zhao.yunmall.member.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.zhao.common.exception.BizCodeEnum;
+import com.zhao.yunmall.member.exception.PhoneExistException;
+import com.zhao.yunmall.member.exception.UsernameExistException;
 import com.zhao.yunmall.member.feign.CouponFeignService;
+import com.zhao.yunmall.member.vo.MemberLoginVo;
+import com.zhao.yunmall.member.vo.MemberRegisterVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.zhao.yunmall.member.entity.MemberEntity;
 import com.zhao.yunmall.member.service.MemberService;
@@ -34,6 +35,9 @@ public class MemberController {
     @Autowired
     private CouponFeignService couponFeignService;
 
+
+
+
     /**
      * 测试远程调用功能
      */
@@ -44,6 +48,33 @@ public class MemberController {
 
         R membercoupons = couponFeignService.membercoupons();
         return R.ok().put("member", memberEntity).put("coupons", membercoupons.get("coupons"));
+    }
+
+    @PostMapping("/register")
+    public R register(@RequestBody MemberRegisterVo vo) {
+        try {
+            // 捕获可能发生的异常：用户名已存在或手机号已存在
+            memberService.register(vo);
+        } catch (PhoneExistException e) {
+            return R.error(BizCodeEnum.PHONE_EXIST_EXCEPTION.getCode(), BizCodeEnum.PHONE_EXIST_EXCEPTION.getMsg());
+        } catch (UsernameExistException e) {
+            return R.error(BizCodeEnum.USER_EXIST_EXCEPTION.getCode(), BizCodeEnum.USER_EXIST_EXCEPTION.getMsg());
+        }
+        return R.ok();
+    }
+
+    /**
+     * 根据传来的数据验证用户名和密码是否匹配
+     * @param vo
+     * @return
+     */
+    @PostMapping("/login")
+    public R login(@RequestBody MemberLoginVo vo) {
+        MemberEntity entity = memberService.login(vo);
+        if (entity == null) {
+            return R.error(BizCodeEnum.LOGIN_INVALID_EXCEPTION.getCode(), BizCodeEnum.LOGIN_INVALID_EXCEPTION.getMsg());
+        }
+        return R.ok();
     }
 
 

@@ -54,6 +54,14 @@
             <version>2.2.0.RELEASE</version>
         </dependency>
 
+        <!--  加了以后，配置文件中就会有自定义的提示了 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

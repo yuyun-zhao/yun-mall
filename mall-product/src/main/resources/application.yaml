@@ -50,6 +50,13 @@ logging:
   level:
     com.zhao.yunmall: debug  # 服务上线后，设置为 error
 
+# 自定义线程池配置
+yunmall:
+  thread:
+    core-size: 20
+    max-size: 200
+    keep-alive-time: 10
+
 
 
 

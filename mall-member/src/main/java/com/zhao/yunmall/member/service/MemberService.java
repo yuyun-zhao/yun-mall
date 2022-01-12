@@ -3,6 +3,10 @@ package com.zhao.yunmall.member.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zhao.common.utils.PageUtils;
 import com.zhao.yunmall.member.entity.MemberEntity;
+import com.zhao.yunmall.member.exception.PhoneExistException;
+import com.zhao.yunmall.member.exception.UsernameExistException;
+import com.zhao.yunmall.member.vo.MemberLoginVo;
+import com.zhao.yunmall.member.vo.MemberRegisterVo;
 
 import java.util.Map;
 
@@ -16,5 +20,13 @@ import java.util.Map;
 public interface MemberService extends IService<MemberEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+	void register(MemberRegisterVo vo);
+
+	void checkPhoneUnique(String phone) throws PhoneExistException;
+
+	void checkUsernameUnique(String username) throws UsernameExistException;
+
+	MemberEntity login(MemberLoginVo vo);
 }
 

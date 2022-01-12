@@ -17,5 +17,9 @@
         <result property="note" column="note"/>
     </resultMap>
 
+    <select id="getDefaultLevel" resultType="java.lang.Long">
+        select `id` from `ums_member_level` where default_status = 1;
+    </select>
+
 
 </mapper>

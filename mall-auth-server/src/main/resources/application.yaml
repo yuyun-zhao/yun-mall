@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: yunmall-auth-server
+  redis:
+    host: yuyunzhao.cn
+    port: 6379
+    password: zhaoyuyun # 设置密码防止被别人利用
+  cloud:
+    # 服务注册中心
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+  mvc:
+    static-path-pattern: /static/**  # 因为所有的请求都额外带了前缀 /static/，为了后期动静分离
+  thymeleaf:
+      cache: false
+
+server:
+  port: 20000
