@@ -27,5 +27,4 @@ public class UserRegisterVo {
 
 	@NotEmpty(message = "验证码不能为空")
 	private String code;
-
 }

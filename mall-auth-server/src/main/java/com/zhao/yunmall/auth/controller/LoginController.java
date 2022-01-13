@@ -44,10 +44,14 @@ public class LoginController {
 	/**
 	 * 大量的页面跳转需求：发送一个请求，直接跳转到一个页面
 	 * 可以使用 Spring MVC viewController，将请求和页面进行映射，简化开发
-	 *
-	 * @return
 	 */
 
+
+	/**
+	 * 发送短信验证码。
+	 * @param phone
+	 * @return
+	 */
 	@ResponseBody
 	@GetMapping("/sms/sendCode")
 	public R sendCode(@RequestParam("phone") String phone) {
@@ -80,7 +84,9 @@ public class LoginController {
 	}
 
 	/**
-	 * 	使用重定向，防止用户多次刷新页面时重复提交
+	 * 	点击注册按钮，先校验前端传来的数据是否合法
+	 * 	若合法则验证短信验证码是否匹配，如果也合法，则使用重定向转发到首页
+	 * 	选择使用重定向是为了防止用户多次刷新页面时重复提交
 	 * @param registerVo
 	 * @param result
 	 * @param attributes
@@ -99,7 +105,7 @@ public class LoginController {
 			});
 			//1.2 重定向到注册页
 			return "redirect:http://localhost:20000/reg.html";
-		}else {
+		} else {
 			//2.若JSR303校验通过
 			//判断验证码是否正确
 			String code = redisTemplate.opsForValue().get(AuthServerConstant.SMS_CODE_CACHE_PREFIX + registerVo.getPhone());
@@ -113,14 +119,14 @@ public class LoginController {
 				if (r.getCode() == 0) {
 					//调用成功，重定向登录页
 					return "redirect:http://localhost:20000/login.html";
-				}else {
+				} else {
 					//调用失败，返回注册页并显示错误信息
 					String msg = (String) r.get("msg");
 					errors.put("msg", msg);
 					attributes.addFlashAttribute("errors", errors);
 					return "redirect:http://localhost:20000/reg.html";
 				}
-			}else {
+			} else {
 				//2.2 验证码错误
 				errors.put("code", "验证码错误");
 				attributes.addFlashAttribute("errors", errors);
