@@ -65,16 +65,17 @@ public class MemberController {
 
     /**
      * 根据传来的数据验证用户名和密码是否匹配
-     * @param vo
+     * @param loginVo
      * @return
      */
-    @PostMapping("/login")
-    public R login(@RequestBody MemberLoginVo vo) {
-        MemberEntity entity = memberService.login(vo);
-        if (entity == null) {
+    @RequestMapping("/login")
+    public R login(@RequestBody MemberLoginVo loginVo) {
+        MemberEntity entity = memberService.login(loginVo);
+        if (entity != null) {
+            return R.ok().put("memberEntity",entity);
+        } else {
             return R.error(BizCodeEnum.LOGIN_INVALID_EXCEPTION.getCode(), BizCodeEnum.LOGIN_INVALID_EXCEPTION.getMsg());
         }
-        return R.ok();
     }
 
 

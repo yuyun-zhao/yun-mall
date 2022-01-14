@@ -1,5 +1,6 @@
 package com.zhao.yunmall.product.web;
 
+import com.zhao.common.vo.MemberResponseVo;
 import com.zhao.yunmall.product.entity.CategoryEntity;
 import com.zhao.yunmall.product.service.CategoryService;
 import com.zhao.yunmall.product.vo.Catalog2Vo;
@@ -9,6 +10,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpSession;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +25,7 @@ public class IndexController {
 	CategoryService categoryService;
 
 	@GetMapping({"/", "/index.html"})
-	public String indexPage(Model model) {
+	public String indexPage(Model model, HttpSession session) {
 		// 查出所有的一级分类
 		List<CategoryEntity> categoryEntities = categoryService.getCategoryLevel1();
 		// 将数据存储到 model 中，前端就可以获取到里面保存的数据

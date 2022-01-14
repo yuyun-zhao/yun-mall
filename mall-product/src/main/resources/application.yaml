@@ -1,5 +1,8 @@
 server:
   port: 10000
+  servlet:
+    session:
+      timeout: 30m  # Session 30分钟后过期
 
 spring:
   datasource:
@@ -33,7 +36,8 @@ spring:
     static-locations: [classpath:/static/]
   mvc:
     static-path-pattern: /static/**  # 因为所有的请求都额外带了前缀 /static/，为了后期动静分离
-
+  session:
+    store-type: redis
 
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml

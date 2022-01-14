@@ -31,6 +31,7 @@ public class SearchController {
 		searchParam.set_queryString(request.getQueryString());
 		SearchResult result = mallSearchService.getSearchResult(searchParam);
 		model.addAttribute("result", result);
+		System.out.println(result);
 		return "search";
 	}
 }

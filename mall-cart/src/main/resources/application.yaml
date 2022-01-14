@@ -1,0 +1,36 @@
+server:
+  port: 18001
+
+spring:
+  application:
+    name: yunmall-cart
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848  # nacos 注册中心地址
+  thymeleaf:
+    cache: false
+  redis:
+    host: yuyunzhao.cn
+    port: 6379
+    password: zhaoyuyun # 设置密码防止被别人利用
+  session:
+      store-type: redis
+  resources:
+    static-locations: [ classpath:/static/ ]
+  mvc:
+    static-path-pattern: /static/**  # 因为所有的请求都额外带了前缀 /static/，为了后期动静分离
+
+
+# 自定义线程池参数
+yunmall:
+  thread:
+    corePoolSize: 10
+    maxPoolSize: 20
+    keepAliveTime: 300
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'

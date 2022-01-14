@@ -1,8 +1,11 @@
 package com.zhao.yunmall.auth.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.zhao.common.constant.AuthServerConstant;
 import com.zhao.common.exception.BizCodeEnum;
 import com.zhao.common.utils.R;
+import com.zhao.common.vo.MemberResponseVo;
 import com.zhao.yunmall.auth.feign.MemberFeignService;
 import com.zhao.yunmall.auth.feign.ThirdPartFeignService;
 import com.zhao.yunmall.auth.vo.UserLoginVo;
@@ -12,12 +15,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,6 +50,7 @@ public class LoginController {
 
 	/**
 	 * 发送短信验证码。
+	 *
 	 * @param phone
 	 * @return
 	 */
@@ -84,9 +86,10 @@ public class LoginController {
 	}
 
 	/**
-	 * 	点击注册按钮，先校验前端传来的数据是否合法
-	 * 	若合法则验证短信验证码是否匹配，如果也合法，则使用重定向转发到首页
-	 * 	选择使用重定向是为了防止用户多次刷新页面时重复提交
+	 * 点击注册按钮，先校验前端传来的数据是否合法
+	 * 若合法则验证短信验证码是否匹配，如果也合法，则使用重定向转发到首页
+	 * 选择使用重定向是为了防止用户多次刷新页面时重复提交
+	 *
 	 * @param registerVo
 	 * @param result
 	 * @param attributes
@@ -96,9 +99,9 @@ public class LoginController {
 	public String register(@Valid UserRegisterVo registerVo, BindingResult result, RedirectAttributes attributes) {
 		//1.判断校验是否通过
 		Map<String, String> errors = new HashMap<>();
-		if (result.hasErrors()){
+		if (result.hasErrors()) {
 			//1.1 如果校验不通过，则封装校验结果
-			result.getFieldErrors().forEach(item->{
+			result.getFieldErrors().forEach(item -> {
 				errors.put(item.getField(), item.getDefaultMessage());
 				//1.2 将错误信息封装到session中
 				attributes.addFlashAttribute("errors", errors);
@@ -135,19 +138,44 @@ public class LoginController {
 		}
 	}
 
-	@PostMapping("/login")
-	public String login(UserLoginVo vo, RedirectAttributes redirectAttributes) {
-		R res = memberFeignService.login(vo);
-		if (res.getCode() == 0) {
-			// 成功
-			return "redirect:http://localhost:10000";
-		} else {
+	@RequestMapping("/login.html")
+	public String loginPage(HttpSession session) {
+		if (session.getAttribute(AuthServerConstant.LOGIN_USER) != null) {
+			return "redirect:http://localhost:10000/";
+		}else {
+			return "login";
+		}
+	}
+
+	@RequestMapping("/login")
+	public String login(UserLoginVo vo, RedirectAttributes attributes, HttpSession session) {
+		R r = new R();
+		try {
+			r = memberFeignService.login(vo);
+		} catch (Exception e) {
+			// 如果远程调用失败，则仍然能返回login页面，提示用户系统繁忙
 			Map<String, String> errors = new HashMap<>();
-			errors.put("msg", (String) res.get("msg"));
-			redirectAttributes.addFlashAttribute("errors", errors);
+			errors.put("msg", "会员服务系统繁忙，请稍后再试");
+			attributes.addFlashAttribute("errors", errors);
 			return "redirect:http://localhost:20000/login.html";
 		}
-
+		if (r.getCode() == 0) {
+			// 接收会员服务查询到的用户完整信息
+			String jsonString = JSON.toJSONString(r.get("memberEntity"));
+			MemberResponseVo memberResponseVo = JSON.parseObject(jsonString, new TypeReference<MemberResponseVo>() {
+			});
+			// 保存到 Session 中，并重定向到商城首页。key = loginUser; value = vo 对象
+			session.setAttribute(AuthServerConstant.LOGIN_USER, memberResponseVo);
+			System.out.println("auth： " + session.getId());
+			System.out.println(memberResponseVo + " ---------------------- ");
+			return "redirect:http://localhost:10000/";
+		} else {
+			String msg = (String) r.get("msg");
+			Map<String, String> errors = new HashMap<>();
+			errors.put("msg", msg);
+			attributes.addFlashAttribute("errors", errors);
+			return "redirect:http://localhost:20000/login.html";
+		}
 	}
 
 
