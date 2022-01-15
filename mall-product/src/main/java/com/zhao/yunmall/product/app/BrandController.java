@@ -1,15 +1,12 @@
-package com.zhao.yunmall.product.controller;
+package com.zhao.yunmall.product.app;
 
-import java.sql.ResultSet;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.zhao.common.valid.AddGroup;
 import com.zhao.common.valid.UpdateGroup;
 import com.zhao.common.valid.UpdateStatusGroup;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,8 +18,6 @@ import com.zhao.yunmall.product.entity.BrandEntity;
 import com.zhao.yunmall.product.service.BrandService;
 import com.zhao.common.utils.PageUtils;
 import com.zhao.common.utils.R;
-
-import javax.validation.Valid;
 
 
 /**

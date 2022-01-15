@@ -1,8 +1,7 @@
-package com.zhao.yunmall.product.controller;
+package com.zhao.yunmall.product.app;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;

@@ -75,7 +75,7 @@
         </div>
         <div class="p-info">
         <div class="p-name">
-        <a th:href="'http://item.gulimall.com/'+${cartItem.skuId}+'.html'"  th:text="${cartItem.title}"  >TCL 55A950C 55英寸32核人工智能 HDR曲面超薄4K电视金属机身（枪色）</a>
+        <a th:href="'http://localhost:10000/'+${cartItem.skuId}+'.html'"  th:text="${cartItem.title}"  >TCL 55A950C 55英寸32核人工智能 HDR曲面超薄4K电视金属机身（枪色）</a>
     </div>
     <div class="p-extra"> <span class="txt" th:text="'数量：'+${cartItem.count}" >  数量：1</span></div>
     </div>
@@ -88,8 +88,8 @@
         </div>
         <div class="clr"></div>
         <div class="bg_shop">
-        <a class="btn-tobback" th:href="'http://item.gulimall.com/'+${cartItem.skuId}+'.html'">查看商品详情</a>
-        <a class="btn-addtocart"  href="http://cart.gulimall.com/cart.html" id="GotoShoppingCart"><b></b>去购物车结算</a>
+        <a class="btn-tobback" th:href="'http://localhost:10000/'+${cartItem.skuId}+'.html'">查看商品详情</a>
+        <a class="btn-addtocart"  href="http://localhost:30000/cart.html" id="GotoShoppingCart"><b></b>去购物车结算</a>
    </div>
     </div>
     </div>

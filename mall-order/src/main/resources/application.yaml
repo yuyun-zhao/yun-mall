@@ -2,6 +2,8 @@ server:
   port: 9000
 
 spring:
+  application:
+    name: yunmall-order
   datasource:
     username: root
     password: zhaoyuyun
@@ -11,9 +13,11 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: localhost:8848
-  application:
-    name: yunmall-order
+      server-addr: localhost:8848
+  rabbitmq:
+    host: yuyunzhao.cn
+    port: 5672
+    virtual-host: /   # 虚拟主机
 
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml

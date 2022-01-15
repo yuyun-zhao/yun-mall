@@ -1,10 +1,9 @@
-package com.zhao.yunmall.product.controller;
+package com.zhao.yunmall.product.app;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.zhao.yunmall.product.dao.AttrAttrgroupRelationDao;
 import com.zhao.yunmall.product.entity.AttrEntity;
 import com.zhao.yunmall.product.service.AttrAttrgroupRelationService;
 import com.zhao.yunmall.product.service.AttrService;

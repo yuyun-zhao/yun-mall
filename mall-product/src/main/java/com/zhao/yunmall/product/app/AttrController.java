@@ -1,4 +1,4 @@
-package com.zhao.yunmall.product.controller;
+package com.zhao.yunmall.product.app;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -8,7 +8,6 @@ import com.zhao.yunmall.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.zhao.yunmall.product.entity.AttrEntity;
 import com.zhao.yunmall.product.service.AttrService;
 import com.zhao.common.utils.PageUtils;
 import com.zhao.common.utils.R;

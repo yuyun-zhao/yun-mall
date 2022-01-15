@@ -62,7 +62,7 @@
 				<li style="border: 0;">
 					<a th:if="${session.loginUser == null}" href="http://auth.gulimall.com/login.html"
 					   class="aa">你好，请登录</a>
-					<a th:if="${session.loginUser != null}">欢迎, [[${session.loginUser.nickname}]]</a>
+					<a th:if="${session.loginUser != null}">欢迎, [[${session.loginUser.username}]]</a>
 				</li>
 				<li>
 					<a th:if="${session.loginUser == null}" href="http://auth.gulimall.com/reg.html"
@@ -680,7 +680,7 @@
 
 					<div class="box-btns-two"
 						 th:if="${item.seckillSkuVo == null }">
-						<a class="addToCart" href="http://cart.gulimall.com/addToCart" th:attr="skuId=${item.info.skuId}">
+						<a class="addToCart" href="http://localhost:30000/addToCart" th:attr="skuId=${item.info.skuId}">
 							加入购物车
 						</a>
 					</div>
@@ -1389,7 +1389,7 @@
 	$(".addToCart").click(function () {
 		let skuId = $(this).attr("skuId");
 		let num = $("#productNum").val();
-		location.href = "http://cart.gulimall.com/addCartItem?skuId=" + skuId + "&num=" + num;
+		location.href = "http://localhost:30000/addCartItem?skuId=" + skuId + "&num=" + num;
 		return false;
 	});
 

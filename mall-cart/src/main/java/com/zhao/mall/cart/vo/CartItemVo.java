@@ -82,6 +82,7 @@ public class CartItemVo {
 
     /**
      * 当前购物车项总价等于单价x数量
+     * 将计算总价的代码写在 getTotalPrice 里，这样每次转JSON存到Redis里时，就会调用get方法，就会重新计算总价
      * @return
      */
     public BigDecimal getTotalPrice() {

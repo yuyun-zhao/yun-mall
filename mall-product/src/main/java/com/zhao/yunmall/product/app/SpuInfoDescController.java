@@ -1,4 +1,4 @@
-package com.zhao.yunmall.product.controller;
+package com.zhao.yunmall.product.app;
 
 import java.util.Arrays;
 import java.util.Map;

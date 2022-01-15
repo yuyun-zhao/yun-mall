@@ -18,7 +18,7 @@
 					<ul class="header-left">
 						<li>
 
-							<a href="http://gulimall.com/">首页</a>
+							<a href="http://localhost:10000/">首页</a>
 						</li>
 
 					</ul>
@@ -48,15 +48,15 @@
 			<div class="one_sousuo">
 				<div class="one_search_top">
 					<div class="one_top_left">
-						<a href="/static/cart/" class="one_left_logo"><img src="/static/cart/img/logo1.jpg"></a>
-						<a href="#" class="one_left_link">购物车</a>
+						<a class="one_left_logo"><img src="/static/cart/img/logo1.jpg"></a>
+						<a class="one_left_link">购物车</a>
 					</div>
 					<div class="one_top_right">
 						<input type="text" class="one_right_txt" placeholder="" onfocus="this.placeholder=''" onblur="this.placeholder='' ">
 						<input type="button" value="搜索" class="one_right_btn">
 					</div>
 				</div>
-				<div class="one_search_load" th:if="${userId}==null">
+				<div class="one_search_load" th:if="${session.loginUser == null}">
 					<img src="/static/cart/img/shop_07.jpg" class="one_load_wraing">
 					<span>您还没有登录！登录后购物车的商品将保存到您账号中</span>
 					<a href="#"><input type="button" onclick="login()" value="立即登录" class="one_load_btn"></a>
@@ -93,9 +93,11 @@
 									<li><input type="checkbox" class="check" th:value="${item.skuId}" onchange="checkSku(this)" th:checked="${item.check}" /></li>
 									<li>
 										<dt><img th:src="${item.image}" src="/static/cart/img/shop1.jpg" alt=""></dt>
-										<dd th:onclick="'toItem('+${item.skuId}+')'">
+										<dd th:onclick="'toItem('+${item.skuId}+')'" style="width: 300px">
 											<p>
 												<span th:text="${item.title}">TCL 55A950C 55英寸32核</span>
+												<br>
+												<span th:each="attr:${item.skuAttrValues}" th:text="${attr}"></span>
 											</p>
 										</dd>
 									</li>
@@ -178,8 +180,8 @@
 					</div>
 					<div>
 						<ol>
-							<li>总价:<span style="color:#e64346;font-weight:bold;font-size:16px;" class="fnt">￥0.00</span> </li>
-
+							<li>总价:<span style="color:#e64346;font-weight:bold;font-size:16px;" class="fnt">￥[[${cart.totalAmount}]]</span> </li>
+							<li>优惠:￥[[${cart.reduce}]]</li>
 						</ol>
 					</div>
 					<div><button onclick="toTrade()" type="button">去结算</button></div>
@@ -254,12 +256,12 @@
 		}
 
 		function toItem(skuId) {
-			window.location.href = "http://item.gulimall.com/" + skuId + ".html";
+			window.location.href = "http://localhost:10000/" + skuId + ".html";
 		}
 
 		function login() {
-			var s = encodeURIComponent("http://cart.gulimall.com/cartList");
-			window.location.href = "http://passport.atguigu.com/index?originUrl=" + s;
+			var s = encodeURIComponent("http://localhost:30000/cartList");
+			window.location.href = "http://localhost:20000/index?originUrl=" + s;
 		}
 
 		function checkSku(chkbox) {
@@ -810,7 +812,7 @@
 		$(".countOpsBtn").click(function () {
 			const skuId=$(this).parent().attr("skuId");
 			const num = $(this).parent().find(".countOpsNum").text();
-			location.href = "http://cart.gulimall.com/countItem?skuId=" + skuId + "&num=" + num;
+			location.href = "http://localhost:30000/countItem?skuId=" + skuId + "&num=" + num;
 		})
 
 		let deleteSkuId=0;
@@ -819,7 +821,7 @@
 		})
 
 		function deleteItem() {
-			location.href="http://cart.gulimall.com/deleteItem?skuId=" + deleteSkuId;
+			location.href="http://localhost:30000/deleteItem?skuId=" + deleteSkuId;
 		}
 	</script>
 </html>

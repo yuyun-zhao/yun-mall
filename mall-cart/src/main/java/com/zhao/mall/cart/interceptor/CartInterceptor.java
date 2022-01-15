@@ -19,7 +19,7 @@ import java.util.UUID;
  */
 public class CartInterceptor implements HandlerInterceptor {
 
-    public static ThreadLocal<UserInfoTo> threadLocal=new ThreadLocal<>();
+    public static ThreadLocal<UserInfoTo> threadLocal = new ThreadLocal<>();
 
     /**
      * 在目标方法执行之前拦截
@@ -51,6 +51,8 @@ public class CartInterceptor implements HandlerInterceptor {
             }
         }
 
+        // 登录了就设置 userId，否则设置 userKey 都是身份标识
+
         // 3 如果浏览器没有user-key，我们通过uuid生成user-key
         if (StringUtils.isEmpty(userInfoTo.getUserKey())) {
             String uuid = UUID.randomUUID().toString();
@@ -76,6 +78,7 @@ public class CartInterceptor implements HandlerInterceptor {
         if (!userInfoTo.getTempUser()) {
             Cookie cookie = new Cookie(CartConstant.TEMP_USER_COOKIE_NAME, userInfoTo.getUserKey());
             cookie.setDomain("localhost");
+            // 设置过期时间，这样即使浏览器关闭也存在。就能做到30天内只要该用户再访问，还能看到之前添加的购物车信息
             cookie.setMaxAge(CartConstant.TEMP_USER_COOKIE_TIMEOUT);
             response.addCookie(cookie);
         }

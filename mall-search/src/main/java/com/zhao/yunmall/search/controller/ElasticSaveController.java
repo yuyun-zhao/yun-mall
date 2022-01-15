@@ -26,6 +26,11 @@ public class ElasticSaveController {
 	@Autowired
 	ProductSaveService productSaveService;
 
+	/**
+	 * 后台管理系统中点击上架商品后，远程调用该方法保存 SkuEsModel 数据
+	 * @param skuEsModelList
+	 * @return
+	 */
 	@PostMapping("/product")
 	public R productStatusUp(@RequestBody List<SkuEsModel> skuEsModelList) {
 		boolean status = false;
