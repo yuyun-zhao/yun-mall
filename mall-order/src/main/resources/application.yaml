@@ -13,11 +13,29 @@ spring:
   cloud:
     nacos:
       discovery:
-      server-addr: localhost:8848
+        server-addr: localhost:8848
+  redis:
+    host: yuyunzhao.cn
+    port: 6379
+    password: zhaoyuyun # 设置密码防止被别人利用
+  session:
+    store-type: redis
   rabbitmq:
     host: yuyunzhao.cn
     port: 5672
-    virtual-host: /   # 虚拟主机
+    virtual-host: /            # 虚拟主机
+    publisher-confirm-type: correlated   # 是否启用【发布确认】：发布消息成功到交换器后会触发回调方法
+    publisher-returns: true    # 是否启用【消息回退】：发送端消息抵达 Queue 失败时进行回调
+    template:
+      mandatory: true          # 开启强制消息投递：发送端消息抵达 Queue 失败时进行回调，二者需要同时开启
+    listener:
+      simple:
+        acknowledge-mode: manual  # 消费者应答
+  resources:
+    static-locations: [ classpath:/static/ ]
+  mvc:
+    static-path-pattern: /static/**  # 因为所有的请求都额外带了前缀 /static/，为了后期动静分离
+
 
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml
@@ -25,3 +43,13 @@ mybatis-plus:
     db-config:
       # 设置主键自增
       id-type: auto
+
+# 自定义线程池配置
+yunmall:
+  thread:
+    core-size: 20
+    max-size: 200
+    keep-alive-time: 10
+
+
+

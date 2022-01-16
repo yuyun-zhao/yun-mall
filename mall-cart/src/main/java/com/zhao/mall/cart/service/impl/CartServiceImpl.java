@@ -84,9 +84,7 @@ public class CartServiceImpl implements CartService {
 
 			try {
 				CompletableFuture.allOf(future1, future2).get();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (ExecutionException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			//2.3 将该属性封装并存入redis,登录用户使用userId为key,否则使用user-key

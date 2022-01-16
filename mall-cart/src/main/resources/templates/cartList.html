@@ -260,7 +260,7 @@
 		}
 
 		function login() {
-			var s = encodeURIComponent("http://localhost:30000/cartList");
+			var s = encodeURIComponent("http://localhost:50000/cartList");
 			window.location.href = "http://localhost:20000/index?originUrl=" + s;
 		}
 
@@ -812,7 +812,7 @@
 		$(".countOpsBtn").click(function () {
 			const skuId=$(this).parent().attr("skuId");
 			const num = $(this).parent().find(".countOpsNum").text();
-			location.href = "http://localhost:30000/countItem?skuId=" + skuId + "&num=" + num;
+			location.href = "http://localhost:50000/countItem?skuId=" + skuId + "&num=" + num;
 		})
 
 		let deleteSkuId=0;
@@ -821,7 +821,7 @@
 		})
 
 		function deleteItem() {
-			location.href="http://localhost:30000/deleteItem?skuId=" + deleteSkuId;
+			location.href="http://localhost:50000/deleteItem?skuId=" + deleteSkuId;
 		}
 	</script>
 </html>

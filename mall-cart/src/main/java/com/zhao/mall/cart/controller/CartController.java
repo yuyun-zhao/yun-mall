@@ -43,11 +43,6 @@ public class CartController {
 		return "cartList";
 	}
 
-	@RequestMapping("/success.html")
-	public String success() {
-		return "success";
-	}
-
 	/**
 	 * 添加商品到购物车
 	 * RedirectAttributes.addFlashAttribute():将数据放在session中，可以在页面中取出，但是只能取一次
