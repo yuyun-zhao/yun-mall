@@ -12,6 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public interface CouponFeignService {
 	// 调用 member 模块里的该方法时，将会去注册中心中找到 yunmall-coupon 服务，向其发出 "/coupon/coupon/member/list" 请求
 	@RequestMapping("/coupon/coupon/member/list")
-	public R membercoupons();
+	R membercoupons();
 }
 

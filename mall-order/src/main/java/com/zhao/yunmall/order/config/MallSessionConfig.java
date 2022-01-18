@@ -18,7 +18,7 @@ public class MallSessionConfig {
     @Bean
     public CookieSerializer cookieSerializer() {
         DefaultCookieSerializer serializer = new DefaultCookieSerializer();
-        serializer.setCookieName("YUNSESSION");
+        serializer.setCookieName("YUNSESSIONID");
         serializer.setDomainName("localhost");
         return serializer;
     }

@@ -3,6 +3,7 @@ package com.zhao.yunmall.ware.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.zhao.yunmall.ware.vo.FareVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +30,17 @@ import com.zhao.common.utils.R;
 public class WareInfoController {
     @Autowired
     private WareInfoService wareInfoService;
+
+    /**
+     * 获取用户地址与邮费
+     * @param addrId
+     * @return
+     */
+    @RequestMapping("/fare/{addrId}")
+    public FareVo getFare(@PathVariable("addrId") Long addrId) {
+        return wareInfoService.getFare(addrId);
+    }
+
 
     /**
      * 列表

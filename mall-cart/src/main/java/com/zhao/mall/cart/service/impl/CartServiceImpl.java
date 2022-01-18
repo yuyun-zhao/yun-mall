@@ -157,6 +157,10 @@ public class CartServiceImpl implements CartService {
 		ops.delete(skuId.toString());
 	}
 
+	/**
+	 * 被订单服务远程调用。但其实应该还要商品服务查询新的价格，这里少了一步
+	 * @return
+	 */
 	@Override
 	public List<CartItemVo> getCheckedItems() {
 		UserInfoTo userInfoTo = CartInterceptor.threadLocal.get();

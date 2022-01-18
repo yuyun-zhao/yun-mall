@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
  * @date 2022/1/17 10:11
  */
 @Data
-@Component
+// @Component 这里再加会重复注入
 @ConfigurationProperties(prefix = "yunmall.thread")
 public class ThreadPoolConfigProperties {
     private Integer coreSize;

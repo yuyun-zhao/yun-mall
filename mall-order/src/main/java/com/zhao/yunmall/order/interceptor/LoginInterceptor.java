@@ -14,7 +14,7 @@ import javax.servlet.http.HttpSession;
  * 登录拦截器，未登录的用户不能进入订单服务
  */
 public class LoginInterceptor implements HandlerInterceptor {
-    public static ThreadLocal<MemberResponseVo> loginUser = new ThreadLocal<>();
+    public static ThreadLocal<MemberResponseVo> loginUserThreadLocal = new ThreadLocal<>();
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -25,13 +25,16 @@ public class LoginInterceptor implements HandlerInterceptor {
         if (match1||match2) return true;
 
         HttpSession session = request.getSession();
+        // 从 Redis Session 中查出当前用户的会员信息
         MemberResponseVo memberResponseVo = (MemberResponseVo) session.getAttribute(AuthServerConstant.LOGIN_USER);
         if (memberResponseVo != null) {
-            loginUser.set(memberResponseVo);
+            // 保存到 ThreadLocal 中，将被 Service 层读取
+            loginUserThreadLocal.set(memberResponseVo);
             return true;
         }else {
             session.setAttribute("msg","请先登录");
-            response.sendRedirect("http://auth.gulimall.com/login.html");
+            // 跳转到登录页面
+            response.sendRedirect("http://localhost:20000/login.html");
             return false;
         }
     }

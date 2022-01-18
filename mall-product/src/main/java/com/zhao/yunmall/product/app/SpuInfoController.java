@@ -50,11 +50,18 @@ public class SpuInfoController {
      * 信息
      */
     @RequestMapping("/info/{id}")
-    public R info(@PathVariable("id") Long id){
+    public R info(@PathVariable("id") Long id) {
 		SpuInfoEntity spuInfo = spuInfoService.getById(id);
 
         return R.ok().put("spuInfo", spuInfo);
     }
+
+    @GetMapping("/skuId/{skuId}")
+    public R getSpuInfoBySkuId(@PathVariable("skuId") Long skuId) {
+        SpuInfoEntity spuInfo = spuInfoService.getSpuInfoBySkuId(skuId);
+        return R.ok().put("spuInfo", spuInfo);
+    }
+
 
     /**
      * 新增商品时，前端会传来一个非常大的JSON数据，里面包含了SPU的各种信息

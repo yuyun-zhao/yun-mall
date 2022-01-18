@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.zhao.common.utils.PageUtils;
 import com.zhao.yunmall.ware.entity.WareSkuEntity;
 import com.zhao.yunmall.ware.vo.SkuHasStockVo;
+import com.zhao.yunmall.ware.vo.WareSkuLockVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -30,5 +31,6 @@ public interface WareSkuService extends IService<WareSkuEntity> {
 	List<SkuHasStockVo> getSkuHasStock(List<Long> skuIds);
 
 
+	Boolean orderLockStock(WareSkuLockVo lockVo);
 }
 

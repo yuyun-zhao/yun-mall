@@ -96,6 +96,10 @@ public class CartController {
 		return "redirect:http://localhost:30000/cart.html";
 	}
 
+	/**
+	 * 被订单服务远程调用，查询被选中的购物项
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping("/getCheckedItems")
 	public List<CartItemVo> getCheckedItems() {

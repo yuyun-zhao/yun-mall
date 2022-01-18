@@ -3,6 +3,9 @@ package com.zhao.yunmall.order.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zhao.common.utils.PageUtils;
 import com.zhao.yunmall.order.entity.OrderEntity;
+import com.zhao.yunmall.order.vo.OrderConfirmVo;
+import com.zhao.yunmall.order.vo.OrderSubmitVo;
+import com.zhao.yunmall.order.vo.SubmitOrderResponseVo;
 
 import java.util.Map;
 
@@ -16,5 +19,9 @@ import java.util.Map;
 public interface OrderService extends IService<OrderEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+	OrderConfirmVo confirmOrder();
+
+	SubmitOrderResponseVo submitOrder(OrderSubmitVo submitVo);
 }
 
