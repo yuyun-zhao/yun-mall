@@ -1,7 +1,7 @@
 package com.zhao.yunmall.search.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.zhao.common.to.to.SkuEsModel;
+import com.zhao.common.to.SkuEsModel;
 import com.zhao.yunmall.search.config.MallElasticSearchConfig;
 import com.zhao.yunmall.search.constant.EsConstant;
 import com.zhao.yunmall.search.service.ProductSaveService;
@@ -13,7 +13,6 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;

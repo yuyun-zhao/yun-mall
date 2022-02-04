@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
  * @author yuyun zhao
  * @date 2022/1/17 10:11
  */
+// @Component // 这里再加会重复注入
 @Data
-// @Component 这里再加会重复注入
 @ConfigurationProperties(prefix = "yunmall.thread")
 public class ThreadPoolConfigProperties {
     private Integer coreSize;

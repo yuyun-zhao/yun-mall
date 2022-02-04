@@ -28,6 +28,12 @@ public class OrderWebController {
 		return page;
 	}
 
+	/**
+	 * 用户在购物车页面点击【去结算】时跳转到这里
+	 * 负责查询出购物车项信息，并远程调用库存服务、会员服务查询出完整的订单信息 OrderConfirmVo
+	 * @param model
+	 * @return
+	 */
 	@RequestMapping("/toTrade")
 	public String toTrade(Model model) {
 		OrderConfirmVo confirmVo = orderService.confirmOrder();

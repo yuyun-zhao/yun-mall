@@ -1,7 +1,7 @@
 package com.zhao.yunmall.search.controller;
 
 import com.zhao.common.exception.BizCodeEnum;
-import com.zhao.common.to.to.SkuEsModel;
+import com.zhao.common.to.SkuEsModel;
 import com.zhao.common.utils.R;
 import com.zhao.yunmall.search.service.ProductSaveService;
 import lombok.extern.slf4j.Slf4j;

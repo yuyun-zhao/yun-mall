@@ -1,6 +1,6 @@
 package com.zhao.yunmall.product.feign;
 
-import com.zhao.common.to.to.SkuEsModel;
+import com.zhao.common.to.SkuEsModel;
 import com.zhao.common.utils.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;

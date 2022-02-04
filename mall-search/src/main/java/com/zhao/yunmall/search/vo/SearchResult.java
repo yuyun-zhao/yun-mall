@@ -1,6 +1,6 @@
 package com.zhao.yunmall.search.vo;
 
-import com.zhao.common.to.to.SkuEsModel;
+import com.zhao.common.to.SkuEsModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

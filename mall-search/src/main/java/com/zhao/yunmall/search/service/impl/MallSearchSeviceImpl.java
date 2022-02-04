@@ -2,7 +2,7 @@ package com.zhao.yunmall.search.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import com.zhao.common.to.to.SkuEsModel;
+import com.zhao.common.to.SkuEsModel;
 import com.zhao.common.utils.R;
 import com.zhao.yunmall.search.config.MallElasticSearchConfig;
 import com.zhao.yunmall.search.constant.EsConstant;

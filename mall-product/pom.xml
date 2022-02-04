@@ -41,6 +41,7 @@
             <scope>test</scope>
         </dependency>
         <!-- 导入 Spring Cloud OpenFeign 依赖 -->
+        <!-- 版本默认使用 spring-cloud-dependencies 里指定的版本 -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>

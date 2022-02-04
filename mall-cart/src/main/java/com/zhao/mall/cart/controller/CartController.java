@@ -55,7 +55,7 @@ public class CartController {
 		attributes.addAttribute("skuId", skuId);
 		// 这里必须用重定向，否则转发到success的话，重复刷新后购物车的数量会增加。
 		// 因为使用重定向的方式
-		return "redirect:http://localhost:30000/addCartItemSuccess";
+		return "redirect:http://localhost:50000/addCartItemSuccess";
 	}
 
 	/**
@@ -81,19 +81,19 @@ public class CartController {
 	@RequestMapping("/checkCart")
 	public String checkCart(@RequestParam("isChecked") Integer isChecked,@RequestParam("skuId")Long skuId) {
 		cartService.checkCart(skuId, isChecked);
-		return "redirect:http://localhost:30000/cart.html";
+		return "redirect:http://localhost:50000/cart.html";
 	}
 
 	@RequestMapping("/countItem")
 	public String changeItemCount(@RequestParam("skuId") Long skuId, @RequestParam("num") Integer num) {
 		cartService.changeItemCount(skuId, num);
-		return "redirect:http://localhost:30000/cart.html";
+		return "redirect:http://localhost:50000/cart.html";
 	}
 
 	@RequestMapping("/deleteItem")
 	public String deleteItem(@RequestParam("skuId") Long skuId) {
 		cartService.deleteItem(skuId);
-		return "redirect:http://localhost:30000/cart.html";
+		return "redirect:http://localhost:50000/cart.html";
 	}
 
 	/**

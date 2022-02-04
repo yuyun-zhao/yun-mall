@@ -70,10 +70,10 @@ public class CartVo {
         BigDecimal total = new BigDecimal(0);
         if (items != null && items.size() > 0) {
             for (CartItemVo item : items) {
-                total.add(item.getTotalPrice());
+               total = total.add(item.getTotalPrice());
             }
         }
-        total.subtract(reduce);
+        total = total.subtract(reduce);
         return total;
     }
 

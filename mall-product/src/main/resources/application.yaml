@@ -5,15 +5,23 @@ server:
       timeout: 30m  # Session 30分钟后过期
 
 spring:
+  # 数据源
   datasource:
     username: root
     password: zhaoyuyun
     url: jdbc:mysql://47.98.120.35:3306/yunmall_pms?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
+  cloud:
+    # 服务注册中心
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+  # Redis
   redis:
     host: yuyunzhao.cn
     port: 6379
     password: zhaoyuyun # 设置密码防止被别人利用
+  # Spring Cache
   cache:
     type: redis  # 配置使用 Redis 进行缓存
     # cache-names:   # 如果没配名字，就按照系统中用到的缓存进行起名
@@ -22,22 +30,19 @@ spring:
       # key-prefix: CACHE_       # key 前缀，推荐不指定，这样分区名（value）默认就是缓存的前缀
       use-key-prefix: true       # 是否使用写入 Redis 前缀
       cache-null-values: true    # 是否允许缓存空值，可用于防止缓存穿透
-
-  cloud:
-    # 服务注册中心
-    nacos:
-      discovery:
-        server-addr: localhost:8848
+  # Spring Session
+  session:
+    store-type: redis
+  # JSON 日期格式化
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
   thymeleaf:
     cache: false   # 开发期间关闭缓存
+  # Spring MVC 静态资源路径
   resources:
     static-locations: [classpath:/static/]
   mvc:
     static-path-pattern: /static/**  # 因为所有的请求都额外带了前缀 /static/，为了后期动静分离
-  session:
-    store-type: redis
 
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml
@@ -48,7 +53,9 @@ mybatis-plus:
       # 设置逻辑删除
       logic-delete-value: 1     # 逻辑已删除值(默认为 1)
       logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
-
+  configuration:
+    # 开启日志显示详细Sql语句
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 # 开启日志
 logging:
   level:
@@ -60,7 +67,3 @@ yunmall:
     core-size: 20
     max-size: 200
     keep-alive-time: 10
-
-
-
-

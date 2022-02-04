@@ -1,4 +1,4 @@
-package com.zhao.common.to.to;
+package com.zhao.common.to;
 
 import lombok.Data;
 

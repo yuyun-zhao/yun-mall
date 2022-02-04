@@ -6,10 +6,12 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.zhao.common.constant.CartConstant;
 import com.zhao.common.exception.NoStockException;
 import com.zhao.common.to.SkuHasStockVo;
+import com.zhao.common.to.mq.OrderTo;
 import com.zhao.common.utils.R;
 import com.zhao.common.vo.MemberResponseVo;
 import com.zhao.yunmall.order.constant.OrderConstant;
 import com.zhao.yunmall.order.entity.OrderItemEntity;
+import com.zhao.yunmall.order.entity.PaymentInfoEntity;
 import com.zhao.yunmall.order.enume.OrderStatusEnum;
 import com.zhao.yunmall.order.feign.CartFeignService;
 import com.zhao.yunmall.order.feign.MemberFeignService;
@@ -22,6 +24,7 @@ import com.zhao.yunmall.order.to.OrderCreateTo;
 import com.zhao.yunmall.order.to.SpuInfoTo;
 import com.zhao.yunmall.order.vo.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -122,7 +125,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 		// 任务5. 总价自动计算
 
 
-
 		// 任务6. 防重令牌。随机生成一个 UUID 作为令牌保存到 Reids 中，并且返回给客户端。
 		// 其在点击【提交订单】时将带上该令牌：key - value = order:token:userId - uuid
 		String token = UUID.randomUUID().toString().replace("-", "");
@@ -181,18 +183,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 			return responseVo;
 		}
 
-		// 2. 创建订单、订单项
+		// 2. 创建出订单 OrderEntity 与订单项 OrderItemEntity 并封装到 OrderCreateTo 对象中
 		OrderCreateTo order = createOrder(memberResponseVo, submitVo);
 
-		// 3. 验证价格
+		// 3. 价格校验：验证后台计算出的价格和前台传来的价格是否一致
 		BigDecimal payAmount = order.getOrder().getPayAmount();
 		BigDecimal payPrice = submitVo.getPayPrice();
-		// 如果后台计算出的价格和前台传来的价格不一致（相差0.01）
+		// 如果后台计算出的价格和前台传来的价格一致（相差小于0.01），则验价成功
 		if (Math.abs(payAmount.subtract(payPrice).doubleValue()) < 0.01) {
-			// 价格一致
-			// 4. 保存订单
+			// 4. 订单持久化：保存订单到数据库中
 			saveOrder(order);
-			// 5. 库存锁定
+
+			// 5. 库存锁定：远程调用库存服务锁定这些订单项的库存
 			// 先提取出需要锁定的订单项
 			List<OrderItemVo> orderItemVos = order.getOrderItems().stream().map((item) -> {
 				OrderItemVo orderItemVo = new OrderItemVo();
@@ -200,43 +202,123 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 				orderItemVo.setCount(item.getSkuQuantity());
 				return orderItemVo;
 			}).collect(Collectors.toList());
-			// 封装出Vo对象：订单号和订单项Vo
+			// 封装出 WareSkuLockVo 对象：设置订单号和订单项 OrderItemVo
 			WareSkuLockVo lockVo = new WareSkuLockVo();
 			lockVo.setOrderSn(order.getOrder().getOrderSn());
 			lockVo.setLocks(orderItemVos);
 			// 远程调用库存服务锁定这些订单项的库存
 			R r = wareFeignService.orderLockStock(lockVo);
-			// 5.1 锁定库存成功
 			if (r.getCode() == 0) {
+				// 5.1 锁定库存成功
 				responseVo.setOrder(order.getOrder());
 				responseVo.setCode(0);
 
-				// 发送消息到订单延迟队列，判断过期订单
-				// rabbitTemplate.convertAndSend("order-event-exchange","order.create.order",order.getOrder());
-				// 清除购物车记录
+				// 6. 定时关单：库存锁定成功后，发送 OrderEntity 数据到订单延迟队列
+				// 待 30 分钟后消息过期即会被路由到死信队列，由监听的 OrderCloseListener 负责判断是否需要关单
+				rabbitTemplate.convertAndSend("order-event-exchange", "order.create.order", order.getOrder());
+
+				// 7. 清除 Redis 缓存中的购物车记录
 				BoundHashOperations<String, Object, Object> ops = redisTemplate.boundHashOps(CartConstant.CART_PREFIX + memberResponseVo.getId());
 				for (OrderItemEntity orderItem : order.getOrderItems()) {
 					ops.delete(orderItem.getSkuId().toString());
 				}
 				return responseVo;
 			} else {
-				//5.1 锁定库存失败
+				// 5.2 锁定库存失败，抛异常。本地事务回滚，上面持久化的订单回滚。
 				String msg = (String) r.get("msg");
 				throw new NoStockException(msg);
 			}
 		} else {
+			// 如果后台计算出的价格和前台传来的价格不一致（相差0.01），设置错误状态码为2
 			responseVo.setCode(2);
 		}
 
 		return responseVo;
 	}
 
+	@Override
+	public OrderEntity getOrderByOrderSn(String orderSn) {
+		OrderEntity order_sn = this.getOne(new QueryWrapper<OrderEntity>().eq("order_sn", orderSn));
+		return order_sn;
+	}
+
+	/**
+	 * 关闭过期的的订单
+	 *
+	 * @param orderEntity
+	 */
+	@Override
+	public void closeOrder(OrderEntity orderEntity) {
+		// 因为消息发送过来的订单已经是很久前的了，中间可能被改动，因此要查询最新的订单
+		OrderEntity newOrderEntity = this.getById(orderEntity.getId());
+		// 如果订单还处于新创建的状态，说明超时未支付，进行关单
+		if (newOrderEntity.getStatus().equals(OrderStatusEnum.CREATE_NEW.getCode())) {
+			OrderEntity updateOrder = new OrderEntity();
+			updateOrder.setId(newOrderEntity.getId());
+			updateOrder.setStatus(OrderStatusEnum.CANCLED.getCode());
+			// 更新指定订单的状态为取消状态 CANCLED
+			this.updateById(updateOrder);
+
+			// 关单后立即发送消息通知其他服务，本订单已经关闭了，可以进行其他处理了。
+			// 例如：1. 库存服务可以解锁库存。2. 优惠券服务可以返回优惠券了
+			OrderTo orderTo = new OrderTo();
+			BeanUtils.copyProperties(newOrderEntity, orderTo);
+			// 发送到订单服务总交换机处，路由到其他服务order.release.other进行关单后的处理
+			rabbitTemplate.convertAndSend("order-event-exchange", "order.release.other", orderTo);
+		}
+	}
+
+	@Override
+	public PayVo getOrderPay(String orderSn) {
+		OrderEntity orderEntity = this.getOne(new QueryWrapper<OrderEntity>().eq("order_sn", orderSn));
+		PayVo payVo = new PayVo();
+		payVo.setOut_trade_no(orderSn);
+		BigDecimal payAmount = orderEntity.getPayAmount().setScale(2, BigDecimal.ROUND_UP);
+		payVo.setTotal_amount(payAmount.toString());
+
+		List<OrderItemEntity> orderItemEntities = orderItemService.list(new QueryWrapper<OrderItemEntity>().eq("order_sn", orderSn));
+		OrderItemEntity orderItemEntity = orderItemEntities.get(0);
+		// 设置订单标题
+		payVo.setSubject(orderItemEntity.getSkuName());
+		payVo.setBody(orderItemEntity.getSkuAttrsVals());
+		return payVo;
+	}
+	//
+	// @Override
+	// public void handlerPayResult(PayAsyncVo payAsyncVo) {
+	// 	//保存交易流水
+	// 	PaymentInfoEntity infoEntity = new PaymentInfoEntity();
+	// 	String orderSn = payAsyncVo.getOut_trade_no();
+	// 	infoEntity.setOrderSn(orderSn);
+	// 	infoEntity.setAlipayTradeNo(payAsyncVo.getTrade_no());
+	// 	infoEntity.setSubject(payAsyncVo.getSubject());
+	// 	String trade_status = payAsyncVo.getTrade_status();
+	// 	infoEntity.setPaymentStatus(trade_status);
+	// 	infoEntity.setCreateTime(new Date());
+	// 	infoEntity.setCallbackTime(payAsyncVo.getNotify_time());
+	// 	paymentInfoService.save(infoEntity);
+	//
+	// 	//判断交易状态是否成功
+	// 	if (trade_status.equals("TRADE_SUCCESS") || trade_status.equals("TRADE_FINISHED")) {
+	// 		baseMapper.updateOrderStatus(orderSn, OrderStatusEnum.PAYED.getCode(), PayConstant.ALIPAY);
+	// 	}
+	// }
+
+
+	/**
+	 * 构建出订单 OrderEntity 与 订单项 OrderItemEntity
+	 * 将二者封装到 OrderCreateTo 对象中
+	 *
+	 * @param memberResponseVo
+	 * @param submitVo
+	 * @return
+	 */
 	private OrderCreateTo createOrder(MemberResponseVo memberResponseVo, OrderSubmitVo submitVo) {
 		// 1. 用 IdWorker 生成订单号
 		String orderSn = IdWorker.getTimeId();
-		// 2. 构建订单 OrderEntity
+		// 2. 构建订单 OrderEntity：
 		OrderEntity entity = buildOrder(memberResponseVo, submitVo, orderSn);
-		// 3. 构建订单项 OrderItemEntity
+		// 3. 构建订单项 OrderItemEntity：远程调用购物车服务获取所有勾选上的购物项，并为其设置订单号
 		List<OrderItemEntity> orderItemEntities = buildOrderItems(orderSn);
 		// 4. 计算价格
 		compute(entity, orderItemEntities);
@@ -264,7 +346,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 		orderEntity.setMemberId(memberResponseVo.getId());
 		orderEntity.setMemberUsername(memberResponseVo.getUsername());
 
-		// 3. 获取邮费和收件人信息并设置到订单中
+		// 3. 远程调用库存服务，获取邮费和收货地址信息并设置到订单中
 		FareVo fareVo = wareFeignService.getFare(submitVo.getAddrId());
 		BigDecimal fare = fareVo.getFare();
 		orderEntity.setFreightAmount(fare);
@@ -333,7 +415,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 			orderItemEntity.setSpuBrand(spuInfo.getBrandName());
 			orderItemEntity.setCategoryId(spuInfo.getCatalogId());
 		}
-		// 3. 商品的优惠信息(不做)
+		// 3. 商品的优惠信息(暂时不做)
 
 		// 4. 商品的积分成长，为价格x数量
 		orderItemEntity.setGiftGrowth(item.getPrice().multiply(new BigDecimal(item.getCount())).intValue());

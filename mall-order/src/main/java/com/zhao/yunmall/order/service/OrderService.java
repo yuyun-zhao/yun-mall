@@ -5,6 +5,7 @@ import com.zhao.common.utils.PageUtils;
 import com.zhao.yunmall.order.entity.OrderEntity;
 import com.zhao.yunmall.order.vo.OrderConfirmVo;
 import com.zhao.yunmall.order.vo.OrderSubmitVo;
+import com.zhao.yunmall.order.vo.PayVo;
 import com.zhao.yunmall.order.vo.SubmitOrderResponseVo;
 
 import java.util.Map;
@@ -23,5 +24,11 @@ public interface OrderService extends IService<OrderEntity> {
 	OrderConfirmVo confirmOrder();
 
 	SubmitOrderResponseVo submitOrder(OrderSubmitVo submitVo);
+
+	OrderEntity getOrderByOrderSn(String orderSn);
+
+	void closeOrder(OrderEntity orderEntity);
+
+	PayVo getOrderPay(String orderSn);
 }
 

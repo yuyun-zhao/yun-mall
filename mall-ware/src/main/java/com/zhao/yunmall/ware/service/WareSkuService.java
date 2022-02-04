@@ -1,6 +1,8 @@
 package com.zhao.yunmall.ware.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.zhao.common.to.mq.OrderTo;
+import com.zhao.common.to.mq.StockLockedTo;
 import com.zhao.common.utils.PageUtils;
 import com.zhao.yunmall.ware.entity.WareSkuEntity;
 import com.zhao.yunmall.ware.vo.SkuHasStockVo;
@@ -32,5 +34,9 @@ public interface WareSkuService extends IService<WareSkuEntity> {
 
 
 	Boolean orderLockStock(WareSkuLockVo lockVo);
+
+	void unlock(StockLockedTo stockLockedTo);
+
+	void unlock(OrderTo orderTo);
 }
 

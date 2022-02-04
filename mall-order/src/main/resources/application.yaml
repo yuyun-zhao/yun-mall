@@ -23,6 +23,8 @@ spring:
   rabbitmq:
     host: yuyunzhao.cn
     port: 5672
+    username: guest
+    password: guest
     virtual-host: /            # 虚拟主机
     publisher-confirm-type: correlated   # 是否启用【发布确认】：发布消息成功到交换器后会触发回调方法
     publisher-returns: true    # 是否启用【消息回退】：发送端消息抵达 Queue 失败时进行回调

@@ -89,7 +89,7 @@ public class CartServiceImpl implements CartService {
 			}
 			//2.3 将该属性封装并存入redis,登录用户使用userId为key,否则使用user-key
 			String toJSONString = JSON.toJSONString(cartItemVo);
-			// 查出来就放到 Redis 里
+			// 查出来就放到 Redis 里。不存到数据库中
 			ops.put(skuId.toString(), toJSONString);
 			return cartItemVo;
 		}

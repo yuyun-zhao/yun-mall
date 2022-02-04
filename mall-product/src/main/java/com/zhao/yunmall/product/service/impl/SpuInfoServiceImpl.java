@@ -1,10 +1,9 @@
 package com.zhao.yunmall.product.service.impl;
 
-import com.alibaba.fastjson.TypeReference;
 import com.zhao.common.constant.ProductConstant;
 import com.zhao.common.to.SkuReductionTo;
 import com.zhao.common.to.SpuBoundTo;
-import com.zhao.common.to.to.SkuEsModel;
+import com.zhao.common.to.SkuEsModel;
 import com.zhao.common.utils.PageUtils;
 import com.zhao.common.utils.Query;
 import com.zhao.common.utils.R;
