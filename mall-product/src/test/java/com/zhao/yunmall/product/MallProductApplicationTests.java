@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.UUID;
 
 @Slf4j
@@ -40,6 +41,7 @@ public class MallProductApplicationTests {
 	public void testFindPath() {
 		Long[] catelogPath = categoryService.findCatelogPath(225L);
 		log.info("完整路径：{}", Arrays.asList(catelogPath));
+
 	}
 
 

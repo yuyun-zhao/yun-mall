@@ -1,0 +1,24 @@
+server:
+  port: 25000
+
+
+spring:
+  application:
+    name: yunmall-seckill
+  cloud:
+    # 服务注册中心
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+  redis:
+    host: yuyunzhao.cn
+    port: 6379
+    password: zhaoyuyun # 设置密码防止被别人利用
+  task:
+    execution:
+      pool:
+        core-size: 5
+        max-size: 50
+#    scheduling:
+#      pool:
+#        size: 5   # 可能某些版本这种方式不好使

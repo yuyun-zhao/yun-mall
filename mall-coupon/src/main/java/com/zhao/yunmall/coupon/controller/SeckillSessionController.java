@@ -1,6 +1,7 @@
 package com.zhao.yunmall.coupon.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,17 @@ import com.zhao.common.utils.R;
 public class SeckillSessionController {
     @Autowired
     private SeckillSessionService seckillSessionService;
+
+    /**
+     * 秒杀服务远程调用该方法，从数据库中查询出最近三天内需要秒杀的SKU信息
+     * @return
+     */
+    @RequestMapping("/getSeckillSessionsIn3Days")
+    public R getSeckillSessionsIn3Days() {
+        List<SeckillSessionEntity> seckillSessionEntities = seckillSessionService.getSeckillSessionsIn3Days();
+        return R.ok().put("seckillSessions", seckillSessionEntities);
+    }
+
 
     /**
      * 列表

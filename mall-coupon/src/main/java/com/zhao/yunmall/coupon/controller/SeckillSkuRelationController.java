@@ -34,8 +34,8 @@ public class SeckillSkuRelationController {
      * 列表
      */
     @RequestMapping("/list")
-    //@RequiresPermissions("coupon:seckillskurelation:list")
     public R list(@RequestParam Map<String, Object> params){
+
         PageUtils page = seckillSkuRelationService.queryPage(params);
 
         return R.ok().put("page", page);

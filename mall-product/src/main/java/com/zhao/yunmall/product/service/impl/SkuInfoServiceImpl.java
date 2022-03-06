@@ -169,6 +169,10 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
 			skuItemVo.setImages(imagesEntities);
 		}, executor);
 
+		// 3. 去秒杀服务查询当前 sku 是否参与秒杀优惠
+
+
+
 
 		//  阻塞等待所有任务都执行完毕才能返回skuItemVo，所以要用allOf().get()
 		CompletableFuture.allOf(saleAttrFuture, descFuture, baseAttrFuture, imagesFuture).get();

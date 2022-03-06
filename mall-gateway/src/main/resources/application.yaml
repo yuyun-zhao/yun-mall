@@ -39,6 +39,13 @@ spring:
             - Path=/api/ware/**
           filters:
             - RewritePath=/api/(?<segment>.*), /$\{segment}
+        # 会员服务的路由规则
+        - id: coupon-route
+          uri: lb://yunmall-coupon
+          predicates:
+            - Path=/api/coupon/**
+          filters:
+            - RewritePath=/api/(?<segment>.*), /$\{segment}
         # 后台管理系统的路由规则
         - id: admin_route
           uri: lb://renren-fast # 负载均衡到 renren-fast
@@ -53,6 +60,7 @@ spring:
           uri: lb://yunmall-product
           predicates:
             - Host=**.yuyunzhao.cn
+
 
 
 ## 前端项目发来的请求都带有 /api 前缀。转发到路由服务后，需要重写路径，将 /api 前缀给去掉
